@@ -1,12 +1,13 @@
 import type { Database } from "bun:sqlite";
 import { migration001 } from "./migrations/001-initial";
+import { migration002 } from "./migrations/002-media";
 
 interface Migration {
   version: number;
   up: (db: Database) => void;
 }
 
-const migrations: Migration[] = [migration001];
+const migrations: Migration[] = [migration001, migration002];
 
 export function runMigrations(db: Database): void {
   db.exec(`CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY)`);
