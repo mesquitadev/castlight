@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { ContentType } from "@castlight/shared";
 import { OBSStatusCard } from "../components/OBSStatusCard";
+import { WallpaperPicker } from "../components/WallpaperPicker";
 
 export function Dashboard() {
   const presentation = useSelector((s: RootState) => s.presentation);
@@ -21,14 +22,18 @@ export function Dashboard() {
           <p className="text-lg font-medium text-white mt-1">
             {presentation.contentType === ContentType.Lyrics && presentation.currentSong?.title}
             {presentation.contentType === ContentType.Bible && presentation.currentReference && `${presentation.currentReference.book} ${presentation.currentReference.chapter}:${presentation.currentReference.verseStart}`}
-            {presentation.contentType === ContentType.Blank && "Nada"}
+            {presentation.contentType === ContentType.Slide && "Slide"}
+            {presentation.contentType === ContentType.Image && "Imagem"}
+            {presentation.contentType === ContentType.Video && "Video"}
+            {presentation.contentType === ContentType.Notice && "Aviso"}
+            {presentation.contentType === ContentType.Blank && "Papel de parede"}
             {presentation.contentType === ContentType.Black && "Tela preta"}
           </p>
         </div>
       </div>
-      <div className="bg-zinc-800 rounded-xl aspect-video flex items-center justify-center">
-        <p className="text-zinc-500">Preview da tela publica</p>
-      </div>
+
+      {/* Wallpaper picker */}
+      <WallpaperPicker />
     </div>
   );
 }

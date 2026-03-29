@@ -2,6 +2,14 @@ var socket = connectSocket();
 var renderer = createRenderer(document.getElementById("content"), document.getElementById("bg"));
 bindScreenEvents(socket, renderer, { enableAudio: true });
 
+// Load saved wallpaper on start
+fetch(window.location.origin + "/api/settings/default_wallpaper")
+  .then(function(r) { return r.json(); })
+  .then(function(config) {
+    if (config && config.type) renderer.setBackground(config);
+  })
+  .catch(function() {});
+
 var lt = document.getElementById("lower-third");
 var ltText = document.getElementById("lt-text");
 var ltSubtext = document.getElementById("lt-subtext");
