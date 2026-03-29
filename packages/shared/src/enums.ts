@@ -22,4 +22,8 @@ export enum ContentType {
   Bible = "bible",
   Blank = "blank",
   Black = "black",
+  Slide = "slide",
+  Image = "image",
+  Video = "video",
+  Notice = "notice",
 }

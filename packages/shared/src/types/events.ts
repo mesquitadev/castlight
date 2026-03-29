@@ -2,6 +2,7 @@ import type { ScreenRole, ContentType } from "../enums";
 import type { SongSection } from "./lyrics";
 import type { BibleVerse, BibleReference } from "./bible";
 import type { ScreenInfo } from "./screen";
+import type { VideoCommand, BackgroundConfig } from "./media";
 
 // Client -> Server
 export interface ClientToServerEvents {
@@ -18,6 +19,11 @@ export interface ServerToClientEvents {
   "content:bible": (data: { verses: BibleVerse[]; reference: BibleReference }) => void;
   "content:clear": (type: ContentType) => void;
   "screens:updated": (screens: ScreenInfo[]) => void;
+  "content:slide": (data: { slideSetId: string; slides: string[]; currentIndex: number; name: string }) => void;
+  "content:image": (data: { url: string; filename: string }) => void;
+  "content:video": (data: VideoCommand) => void;
+  "content:notice": (data: { title: string; body: string }) => void;
+  "background:change": (data: BackgroundConfig) => void;
 }
 
 // Server -> Server (inter-service)
