@@ -1,12 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { Song, CreateSongInput, BibleVersion, BibleBook, BibleVerse, MediaFile, SlideSet, Notice, CreateNoticeInput } from "@castlight/shared";
+import type { Song, CreateSongInput, BibleVersion, BibleBook, BibleVerse, MediaFile, SlideSet, Notice, CreateNoticeInput, OBSConfig, OBSStatus, StreamConfig } from "@castlight/shared";
 
 const SIDECAR_URL = "http://localhost:3100";
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${SIDECAR_URL}/api` }),
-  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices"],
+  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices", "OBS"],
   endpoints: (builder) => ({
     getSongs: builder.query<Song[], string | void>({
       query: (search) => search ? `/lyrics?q=${search}` : "/lyrics",
@@ -99,6 +99,16 @@ export const api = createApi({
       query: (id) => ({ url: `/notices/${id}`, method: "DELETE" }),
       invalidatesTags: ["Notices"],
     }),
+    // OBS
+    getOBSStatus: builder.query<OBSStatus, void>({ query: () => "/obs/status", providesTags: ["OBS"] }),
+    connectOBS: builder.mutation<void, { host?: string; port?: number; password?: string }>({ query: (body) => ({ url: "/obs/connect", method: "POST", body }), invalidatesTags: ["OBS"] }),
+    disconnectOBS: builder.mutation<void, void>({ query: () => ({ url: "/obs/disconnect", method: "POST" }), invalidatesTags: ["OBS"] }),
+    getOBSScenes: builder.query<string[], void>({ query: () => "/obs/scenes" }),
+    setOBSScene: builder.mutation<void, string>({ query: (sceneName) => ({ url: "/obs/scene", method: "POST", body: { sceneName } }) }),
+    startRecording: builder.mutation<void, void>({ query: () => ({ url: "/obs/record/start", method: "POST" }) }),
+    stopRecording: builder.mutation<void, void>({ query: () => ({ url: "/obs/record/stop", method: "POST" }) }),
+    getSetting: builder.query<any, string>({ query: (key) => `/settings/${key}` }),
+    saveSetting: builder.mutation<void, { key: string; value: any }>({ query: ({ key, value }) => ({ url: `/settings/${key}`, method: "PUT", body: value }) }),
   }),
 });
 
@@ -122,4 +132,13 @@ export const {
   useGetSavedNoticesQuery,
   useCreateNoticeMutation,
   useDeleteNoticeMutation,
+  useGetOBSStatusQuery,
+  useConnectOBSMutation,
+  useDisconnectOBSMutation,
+  useGetOBSScenesQuery,
+  useSetOBSSceneMutation,
+  useStartRecordingMutation,
+  useStopRecordingMutation,
+  useGetSettingQuery,
+  useSaveSettingMutation,
 } = api;

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { io, type Socket } from "socket.io-client";
 import { useDispatch } from "react-redux";
 import { setScreens } from "../store/slices/screens";
+import { setOBSStatus } from "../store/slices/obs";
 import type { ServerToClientEvents, ClientToServerEvents } from "@castlight/shared";
 import { SIDECAR_PORT, SIDECAR_WS_PATH } from "@castlight/shared";
 
@@ -24,6 +25,7 @@ export function useSocket(): TypedSocket | null {
     socket.on("screens:updated", (screens) => {
       dispatch(setScreens(screens));
     });
+    socket.on("obs:status", (status) => { dispatch(setOBSStatus(status)); });
     socketRef.current = socket;
     return () => {
       socket.disconnect();
