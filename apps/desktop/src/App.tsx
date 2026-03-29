@@ -24,10 +24,12 @@ export function App() {
   const Page = PAGES[activePanel];
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-white">
+    <div className="flex h-screen" style={{ background: "var(--color-surface-50)", fontFamily: "var(--font-display)" }}>
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        <Page />
+      <main className="flex-1 overflow-y-auto relative">
+        <div className="absolute inset-0 overflow-y-auto">
+          <Page />
+        </div>
       </main>
     </div>
   );
