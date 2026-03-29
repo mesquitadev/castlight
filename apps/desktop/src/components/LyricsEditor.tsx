@@ -16,14 +16,43 @@ const SECTION_TYPES = [
   { value: SectionType.Outro, label: "Outro" },
 ];
 
+const SECTION_MARKERS: Record<string, { type: string; label: string }> = {
+  "verso": { type: SectionType.Verse, label: "Verso" },
+  "verse": { type: SectionType.Verse, label: "Verso" },
+  "refrão": { type: SectionType.Chorus, label: "Refrão" },
+  "refrao": { type: SectionType.Chorus, label: "Refrão" },
+  "chorus": { type: SectionType.Chorus, label: "Refrão" },
+  "ponte": { type: SectionType.Bridge, label: "Ponte" },
+  "bridge": { type: SectionType.Bridge, label: "Ponte" },
+  "pré-refrão": { type: SectionType.PreChorus, label: "Pré-Refrão" },
+  "pre-chorus": { type: SectionType.PreChorus, label: "Pré-Refrão" },
+  "intro": { type: SectionType.Intro, label: "Intro" },
+  "outro": { type: SectionType.Outro, label: "Outro" },
+};
+
 function parseLyricsText(text: string): Array<{ type: string; label: string; text: string; order: number }> {
   const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
-  return blocks.map((block, i) => ({
-    type: i === 0 ? SectionType.Verse : (i % 2 === 1 ? SectionType.Chorus : SectionType.Verse),
-    label: i === 0 ? "Verso 1" : (i % 2 === 1 ? `Refrão` : `Verso ${Math.ceil((i + 1) / 2)}`),
-    text: block.trim(),
-    order: i,
-  }));
+  let verseCount = 0;
+
+  return blocks.map((block, i) => {
+    const trimmed = block.trim();
+    // Check for [Section] markers like [Chorus], [Verso 1], [Bridge]
+    const markerMatch = trimmed.match(/^\[([^\]]+)\]\s*/);
+    if (markerMatch) {
+      const markerText = markerMatch[1].toLowerCase().replace(/\s*\d+$/, "");
+      const known = SECTION_MARKERS[markerText];
+      const cleanText = trimmed.replace(/^\[[^\]]+\]\s*\n?/, "").trim();
+      if (known) {
+        if (known.type === SectionType.Verse) verseCount++;
+        return { type: known.type, label: markerMatch[1], text: cleanText, order: i };
+      }
+      return { type: SectionType.Verse, label: markerMatch[1], text: cleanText, order: i };
+    }
+
+    // Default: everything is a verse (user can change type manually)
+    verseCount++;
+    return { type: SectionType.Verse, label: `Verso ${verseCount}`, text: trimmed, order: i };
+  });
 }
 
 export function LyricsEditor({ onClose, onCreated }: Props) {

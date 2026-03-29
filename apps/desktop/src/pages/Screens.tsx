@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../store";
 import { toggleQRDialog } from "../store/slices/ui";
@@ -30,15 +29,7 @@ async function identifyScreen(socketId: string) {
 }
 
 function ScreenCard({ screen }: { screen: ScreenInfo }) {
-  const [adopted, setAdopted] = useState(screen.role !== null);
-  const [selectedRole, setSelectedRole] = useState<ScreenRole | null>(screen.role);
-
-  const handleAdopt = () => {
-    setAdopted(true);
-  };
-
   const handleAssignRole = async (role: ScreenRole) => {
-    setSelectedRole(role);
     await assignRole(screen.id, role);
   };
 
@@ -56,43 +47,31 @@ function ScreenCard({ screen }: { screen: ScreenInfo }) {
             onClick={() => identifyScreen(screen.id)}
             className="text-xs transition-colors"
             style={{ color: "var(--color-text-muted)" }}
+            aria-label="Identificar tela"
           >
             Identificar
           </button>
-          {selectedRole && (
+          {screen.role && (
             <span className="badge badge-accent">
-              {ROLE_OPTIONS.find((r) => r.value === selectedRole)?.label}
+              {ROLE_OPTIONS.find((r) => r.value === screen.role)?.label}
             </span>
           )}
         </div>
       </div>
 
-      {!adopted ? (
-        <button
-          onClick={handleAdopt}
-          className="btn btn-primary w-full"
-          style={{ background: "var(--color-success)" }}
-        >
-          Adotar esta tela
-        </button>
-      ) : (
-        <div className="space-y-2">
-          <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Selecione o papel:</p>
-          <div className="grid grid-cols-3 gap-2">
-            {ROLE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => handleAssignRole(opt.value)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedRole === opt.value ? "btn btn-primary" : "btn btn-secondary"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="grid grid-cols-3 gap-2">
+        {ROLE_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => handleAssignRole(opt.value)}
+            className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+              screen.role === opt.value ? "btn btn-primary" : "btn btn-secondary"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
     </li>
   );
 }

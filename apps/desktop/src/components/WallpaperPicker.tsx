@@ -142,8 +142,8 @@ export function WallpaperPicker() {
               <button
                 key={bg.id}
                 onClick={() => applyWallpaper({ type: "image", value: `/api/media/file/${bg.id}` })}
-                className={`aspect-video rounded overflow-hidden ${isActive ? "ring-2" : "hover:ring-1"}`}
-                style={isActive ? { outline: `2px solid var(--color-accent)` } : {}}
+                className="aspect-video rounded overflow-hidden"
+                style={{ outline: isActive ? "2px solid var(--color-accent)" : "1px solid var(--color-surface-400)", outlineOffset: "1px" }}
               >
                 <img
                   src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`}
