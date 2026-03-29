@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castlight — Biblia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <link rel="stylesheet" href="/css/screen.css">
+</head>
+<body class="bg-zinc-950 text-white">
+  <div class="max-w-2xl mx-auto p-4 space-y-4">
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl font-bold">Biblia</h1>
+      <select id="version-select" class="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm"></select>
+    </div>
+    <div id="breadcrumb" class="text-sm text-zinc-400"></div>
+    <div id="search-box" class="flex gap-2">
+      <input id="search-input" type="text" placeholder="Buscar texto..." class="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-zinc-500" />
+      <button id="search-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Buscar</button>
+    </div>
+    <div id="content-area" class="space-y-2"></div>
+  </div>
+  <script src="/js/bible.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castlight — Tecnica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <link rel="stylesheet" href="/css/screen.css">
+</head>
+<body class="bg-zinc-950 text-white p-6">
+  <h1 class="text-2xl font-bold mb-6">Castlight Tecnica</h1>
+  <div class="grid grid-cols-2 gap-4">
+    <div class="bg-zinc-800 rounded-xl p-4">
+      <h2 class="text-zinc-400 text-sm uppercase mb-2">Servidor</h2>
+      <div id="server-info" class="text-white text-sm space-y-1"></div>
+    </div>
+    <div class="bg-zinc-800 rounded-xl p-4">
+      <h2 class="text-zinc-400 text-sm uppercase mb-2">OBS</h2>
+      <div id="obs-info" class="text-white text-sm">Desconectado</div>
+    </div>
+    <div class="col-span-2 bg-zinc-800 rounded-xl p-4">
+      <h2 class="text-zinc-400 text-sm uppercase mb-3">Telas conectadas</h2>
+      <div id="screens-list" class="space-y-2"></div>
+    </div>
+  </div>
+  <script src="/js/tech.js"></script>
+</body>
+</html>

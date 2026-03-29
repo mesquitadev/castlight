@@ -1,0 +1,29 @@
+var socket = connectSocket();
+var renderer = createRenderer(document.getElementById("content"), document.getElementById("bg"));
+bindScreenEvents(socket, renderer, { enableAudio: true });
+
+var lt = document.getElementById("lower-third");
+var ltText = document.getElementById("lt-text");
+var ltSubtext = document.getElementById("lt-subtext");
+
+socket.on("content:lyrics", function(data) {
+  ltText.textContent = data.song.title;
+  ltSubtext.textContent = data.song.artist;
+  lt.classList.add("visible");
+});
+
+socket.on("content:bible", function(data) {
+  var ref = data.reference.book + " " + data.reference.chapter + ":" + data.reference.verseStart;
+  ltText.textContent = ref;
+  ltSubtext.textContent = data.reference.version.toUpperCase();
+  lt.classList.add("visible");
+});
+
+socket.on("content:clear", function() { lt.classList.remove("visible"); });
+
+socket.on("stream:lower-third", function(data) {
+  ltText.textContent = data.text;
+  ltSubtext.textContent = data.subtext;
+  if (data.visible) lt.classList.add("visible");
+  else lt.classList.remove("visible");
+});

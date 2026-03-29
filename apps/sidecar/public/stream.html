@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castlight — Stream</title>
+  <link rel="stylesheet" href="/css/screen.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/renderer.js"></script>
+</head>
+<body>
+  <div class="screen-container">
+    <div class="background-layer" id="bg"></div>
+    <div class="content-layer fade-in" id="content"></div>
+    <div class="lower-third" id="lower-third">
+      <div class="text" id="lt-text"></div>
+      <div class="subtext" id="lt-subtext"></div>
+    </div>
+  </div>
+  <script src="/js/stream.js"></script>
+</body>
+</html>
