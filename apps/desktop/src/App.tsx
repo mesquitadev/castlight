@@ -7,6 +7,7 @@ import { Lyrics } from "./pages/Lyrics";
 import { Bible } from "./pages/Bible";
 import { Screens } from "./pages/Screens";
 import { Media } from "./pages/Media";
+import { Settings } from "./pages/Settings";
 
 const PAGES = {
   dashboard: Dashboard,
@@ -14,6 +15,7 @@ const PAGES = {
   bible: Bible,
   screens: Screens,
   media: Media,
+  settings: Settings,
 } as const;
 
 export function App() {

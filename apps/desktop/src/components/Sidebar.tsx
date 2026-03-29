@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id: "bible" as const, label: "Biblia", icon: "📖" },
   { id: "screens" as const, label: "Telas", icon: "🖥️" },
   { id: "media" as const, label: "Midia", icon: "🎬" },
+  { id: "settings" as const, label: "Config", icon: "⚙️" },
 ];
 
 export function Sidebar() {

@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { ContentType } from "@castlight/shared";
+import { OBSStatusCard } from "../components/OBSStatusCard";
 
 export function Dashboard() {
   const presentation = useSelector((s: RootState) => s.presentation);
@@ -14,6 +15,7 @@ export function Dashboard() {
           <p className="text-zinc-400 text-sm">Telas conectadas</p>
           <p className="text-3xl font-bold text-white mt-1">{screenCount}</p>
         </div>
+        <OBSStatusCard />
         <div className="bg-zinc-800 rounded-xl p-4">
           <p className="text-zinc-400 text-sm">Exibindo</p>
           <p className="text-lg font-medium text-white mt-1">
