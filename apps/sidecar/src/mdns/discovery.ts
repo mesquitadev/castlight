@@ -1,8 +1,8 @@
-import ciao from "@homebridge/ciao";
+import * as ciao from "@homebridge/ciao";
 import { SIDECAR_PORT, MDNS_SERVICE_NAME } from "@castlight/shared";
 import { networkInterfaces } from "os";
 
-let responder: ciao.CiaoService | null = null;
+let responder: any = null;
 
 export function getLocalIP(): string {
   const nets = networkInterfaces();
