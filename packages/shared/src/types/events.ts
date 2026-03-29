@@ -3,6 +3,7 @@ import type { SongSection } from "./lyrics";
 import type { BibleVerse, BibleReference } from "./bible";
 import type { ScreenInfo } from "./screen";
 import type { VideoCommand, BackgroundConfig } from "./media";
+import type { StreamConfig, LowerThirdData, OBSStatus } from "./obs";
 
 // Client -> Server
 export interface ClientToServerEvents {
@@ -24,6 +25,9 @@ export interface ServerToClientEvents {
   "content:video": (data: VideoCommand) => void;
   "content:notice": (data: { title: string; body: string }) => void;
   "background:change": (data: BackgroundConfig) => void;
+  "stream:config": (config: StreamConfig) => void;
+  "stream:lower-third": (data: LowerThirdData) => void;
+  "obs:status": (status: OBSStatus) => void;
 }
 
 // Server -> Server (inter-service)
