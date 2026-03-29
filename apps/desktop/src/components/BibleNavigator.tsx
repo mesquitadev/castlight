@@ -120,6 +120,40 @@ function broadcastBackground(config: BackgroundConfig) {
   });
 }
 
+function parseReference(input: string, books: Array<{ name: string; abbr: string }>) {
+  // Formats: "Jo 3:16", "Genesis 1:1", "Gn 1 1", "jo3:16", "salmos 23"
+  const cleaned = input.trim();
+
+  // Try to match: book chapter:verse or book chapter verse
+  const match = cleaned.match(/^(.+?)\s*(\d+)\s*[:\s.,]\s*(\d+)$/);
+  if (match) {
+    const bookQuery = match[1].trim().toLowerCase();
+    const chapter = parseInt(match[2]);
+    const verse = parseInt(match[3]);
+    const book = books.find((b) =>
+      b.name.toLowerCase().startsWith(bookQuery) ||
+      b.abbr.toLowerCase() === bookQuery ||
+      b.abbr.toLowerCase().startsWith(bookQuery)
+    );
+    if (book) return { book: book.name, chapter, verse };
+  }
+
+  // Try: book chapter (no verse)
+  const matchChapter = cleaned.match(/^(.+?)\s*(\d+)$/);
+  if (matchChapter) {
+    const bookQuery = matchChapter[1].trim().toLowerCase();
+    const chapter = parseInt(matchChapter[2]);
+    const book = books.find((b) =>
+      b.name.toLowerCase().startsWith(bookQuery) ||
+      b.abbr.toLowerCase() === bookQuery ||
+      b.abbr.toLowerCase().startsWith(bookQuery)
+    );
+    if (book) return { book: book.name, chapter, verse: null };
+  }
+
+  return null;
+}
+
 export function BibleNavigator() {
   const dispatch = useDispatch();
   const [version, setVersion] = useState("acf");
@@ -127,6 +161,9 @@ export function BibleNavigator() {
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [bibleBg, setBibleBg] = useState<BackgroundConfig | null>(null);
+  const [quickSearch, setQuickSearch] = useState("");
+  const [showQuickSearch, setShowQuickSearch] = useState(false);
+  const quickSearchRef = useRef<HTMLInputElement>(null);
   const verseListRef = useRef<HTMLDivElement>(null);
   const verseRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
@@ -179,43 +216,112 @@ export function BibleNavigator() {
     });
   }, [selectedBook, selectedChapter, version, verses, dispatch, bibleBg]);
 
+  // Quick search handler
+  const handleQuickSearchSubmit = useCallback(() => {
+    const parsed = parseReference(quickSearch, books);
+    if (parsed) {
+      setSelectedBook(parsed.book);
+      setSelectedChapter(parsed.chapter);
+      setSelectedVerse(null);
+      if (parsed.verse) {
+        // Small delay to let verses load, then send
+        setTimeout(() => sendVerse(parsed.verse!), 300);
+      }
+    }
+    setShowQuickSearch(false);
+    setQuickSearch("");
+  }, [quickSearch, books, sendVerse]);
+
+  // Focus quick search input when shown
+  useEffect(() => {
+    if (showQuickSearch) {
+      setTimeout(() => quickSearchRef.current?.focus(), 50);
+    }
+  }, [showQuickSearch]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept if quick search is open
+      if (showQuickSearch) return;
+
       // Esc — clear presentation (restore worship wallpaper)
       if (e.key === "Escape") {
         e.preventDefault();
         setSelectedVerse(null);
         dispatch(clearPresentation());
         broadcastClear();
-        // Restore worship wallpaper
         fetch(`http://localhost:${SIDECAR_PORT}/api/settings/default_wallpaper`)
           .then((r) => r.json())
           .then((config) => { if (config?.type) broadcastBackground(config); });
         return;
       }
 
-      if (!selectedBook || !selectedChapter || verses.length === 0) return;
-
+      // Arrow keys — navigate verses
       if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        if (selectedBook && selectedChapter && verses.length > 0) {
+          e.preventDefault();
+          const current = selectedVerse ?? 0;
+          const next = Math.min(current + 1, verses.length);
+          sendVerse(next);
+        }
+        return;
+      }
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        if (selectedBook && selectedChapter && verses.length > 0) {
+          e.preventDefault();
+          const current = selectedVerse ?? 2;
+          const prev = Math.max(current - 1, 1);
+          sendVerse(prev);
+        }
+        return;
+      }
+
+      // Any letter/number key — open quick search
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        const current = selectedVerse ?? 0;
-        const next = Math.min(current + 1, verses.length);
-        sendVerse(next);
-      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-        e.preventDefault();
-        const current = selectedVerse ?? 2;
-        const prev = Math.max(current - 1, 1);
-        sendVerse(prev);
+        setQuickSearch(e.key);
+        setShowQuickSearch(true);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedVerse, selectedBook, selectedChapter, verses, sendVerse, dispatch]);
+  }, [selectedVerse, selectedBook, selectedChapter, verses, sendVerse, dispatch, showQuickSearch]);
 
   return (
-    <div className="flex gap-2 h-[calc(100vh-8rem)]">
+    <div className="flex gap-2 h-[calc(100vh-8rem)] relative">
+      {/* Quick search modal */}
+      {showQuickSearch && (
+        <div className="absolute inset-0 z-50 flex items-start justify-center pt-20 bg-black/50">
+          <div className="bg-zinc-800 rounded-xl p-6 w-96 shadow-2xl border border-zinc-700">
+            <p className="text-zinc-400 text-xs mb-2">Digite uma referencia para localizar o versiculo</p>
+            <input
+              ref={quickSearchRef}
+              type="text"
+              value={quickSearch}
+              onChange={(e) => setQuickSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); handleQuickSearchSubmit(); }
+                if (e.key === "Escape") { e.preventDefault(); setShowQuickSearch(false); setQuickSearch(""); }
+              }}
+              placeholder="Ex: Jo 3:16, Genesis 1:1, Sl 23"
+              className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white text-lg placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+            />
+            <div className="mt-3 flex items-center justify-between text-zinc-500 text-xs">
+              <span>Enter para ir | Esc para fechar</span>
+              {quickSearch && (() => {
+                const parsed = parseReference(quickSearch, books);
+                return parsed
+                  ? <span className="text-green-400">{parsed.book} {parsed.chapter}{parsed.verse ? `:${parsed.verse}` : ""}</span>
+                  : <span className="text-red-400">Referencia nao encontrada</span>;
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left panel — Verse text (main area, like Holyrics) */}
       <div className="flex-1 flex flex-col bg-zinc-900 rounded-lg overflow-hidden">
         {/* Header */}
@@ -300,7 +406,7 @@ export function BibleNavigator() {
           <span>
             {selectedVerse
               ? `${selectedBook} ${selectedChapter}:${selectedVerse} — ${version.toUpperCase()}`
-              : "↑↓ Navegar | Enter/Click Projetar | Esc Limpar tela"}
+              : "↑↓ Navegar | Esc Limpar | Digite para busca rapida (ex: Jo 3:16)"}
           </span>
           {selectedVerse && (
             <span>{selectedVerse} de {verses.length}</span>
