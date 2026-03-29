@@ -10,5 +10,14 @@
   "devDependencies": {
     "turbo": "^2",
     "typescript": "^5.7"
+  },
+  "pnpm": {
+    "executionEnv": {
+      "nodeVersion": "22"
+    },
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ]
   }
 }
