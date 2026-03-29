@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castlight — Retorno</title>
+  <link rel="stylesheet" href="/css/screen.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/socket-client.js"></script>
+</head>
+<body class="bg-zinc-950 text-white">
+  <div class="h-screen flex flex-col">
+    <div id="header" class="flex items-center justify-between px-6 py-3 bg-zinc-900 border-b border-zinc-800">
+      <span id="song-key" class="text-blue-400 font-mono text-lg"></span>
+      <span id="song-title" class="text-zinc-400 text-sm"></span>
+      <span id="section-pos" class="text-zinc-500 text-sm"></span>
+    </div>
+    <div id="current" class="flex-1 flex items-center justify-center px-8">
+      <div id="current-text" class="text-center text-4xl leading-relaxed whitespace-pre-line"></div>
+    </div>
+    <div id="next" class="h-1/4 bg-zinc-900/50 border-t border-zinc-800 flex items-center justify-center px-8">
+      <div class="text-center">
+        <span class="text-zinc-500 text-xs uppercase tracking-wide">Proximo</span>
+        <div id="next-text" class="text-zinc-400 text-xl mt-1 whitespace-pre-line"></div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/stage.js"></script>
+</body>
+</html>
