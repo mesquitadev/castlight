@@ -91,8 +91,8 @@ export function ThemesTab() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-white font-semibold">{editing ? "Editar Tema" : "Novo Tema"}</h3>
-          <button onClick={() => { setShowCreate(false); setEditing(null); resetForm(); }} className="text-zinc-400 text-sm hover:text-white">Cancelar</button>
+          <h3 className="font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>{editing ? "Editar Tema" : "Novo Tema"}</h3>
+          <button onClick={() => { setShowCreate(false); setEditing(null); resetForm(); }} className="text-sm" style={{ color: "var(--color-text-muted)" }}>Cancelar</button>
         </div>
 
         {/* Preview */}
@@ -118,15 +118,30 @@ export function ThemesTab() {
           </p>
         </div>
 
-        <input type="text" placeholder="Nome do tema *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm" />
+        <input type="text" placeholder="Nome do tema *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input-field w-full" />
 
         {/* Background */}
-        <div className="bg-zinc-800 rounded-lg p-3 space-y-2">
-          <p className="text-zinc-400 text-xs uppercase">Fundo</p>
+        <div className="card p-3 space-y-2">
+          <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Fundo</p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setForm({ ...form, backgroundType: "color" })} className={`px-3 py-1 rounded text-xs ${form.backgroundType === "color" ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>Cor</button>
-            <button onClick={() => setForm({ ...form, backgroundType: "image" })} className={`px-3 py-1 rounded text-xs ${form.backgroundType === "image" ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>Imagem</button>
-            <button onClick={() => setForm({ ...form, backgroundType: "video" })} className={`px-3 py-1 rounded text-xs ${form.backgroundType === "video" ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>Video</button>
+            <button
+              onClick={() => setForm({ ...form, backgroundType: "color" })}
+              className={`px-3 py-1 rounded text-xs ${form.backgroundType === "color" ? "btn btn-primary" : "btn btn-secondary"}`}
+            >
+              Cor
+            </button>
+            <button
+              onClick={() => setForm({ ...form, backgroundType: "image" })}
+              className={`px-3 py-1 rounded text-xs ${form.backgroundType === "image" ? "btn btn-primary" : "btn btn-secondary"}`}
+            >
+              Imagem
+            </button>
+            <button
+              onClick={() => setForm({ ...form, backgroundType: "video" })}
+              className={`px-3 py-1 rounded text-xs ${form.backgroundType === "video" ? "btn btn-primary" : "btn btn-secondary"}`}
+            >
+              Video
+            </button>
           </div>
           {form.backgroundType === "color" && (
             <input type="color" value={form.backgroundValue} onChange={(e) => setForm({ ...form, backgroundValue: e.target.value })} className="w-10 h-10 rounded cursor-pointer" />
@@ -134,7 +149,12 @@ export function ThemesTab() {
           {(form.backgroundType === "image" || form.backgroundType === "video") && (
             <div className="grid grid-cols-6 gap-1">
               {backgrounds.map((bg) => (
-                <button key={bg.id} onClick={() => selectBgImage(bg.id)} className={`aspect-video rounded overflow-hidden ${form.backgroundValue.includes(bg.id) ? "ring-2 ring-blue-500" : ""}`}>
+                <button
+                  key={bg.id}
+                  onClick={() => selectBgImage(bg.id)}
+                  className="aspect-video rounded overflow-hidden"
+                  style={form.backgroundValue.includes(bg.id) ? { outline: `2px solid var(--color-accent)` } : {}}
+                >
                   <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`} className="w-full h-full object-cover" alt="" />
                 </button>
               ))}
@@ -142,7 +162,11 @@ export function ThemesTab() {
           )}
           <div className="flex gap-2">
             {(["cover", "contain", "stretch", "center"] as const).map((f) => (
-              <button key={f} onClick={() => setForm({ ...form, backgroundFit: f })} className={`px-2 py-1 rounded text-xs ${form.backgroundFit === f ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>
+              <button
+                key={f}
+                onClick={() => setForm({ ...form, backgroundFit: f })}
+                className={`px-2 py-1 rounded text-xs ${form.backgroundFit === f ? "btn btn-primary" : "btn btn-secondary"}`}
+              >
                 {f === "cover" ? "Preencher" : f === "contain" ? "Ajustar" : f === "stretch" ? "Esticar" : "Centralizar"}
               </button>
             ))}
@@ -150,13 +174,13 @@ export function ThemesTab() {
         </div>
 
         {/* Typography */}
-        <div className="bg-zinc-800 rounded-lg p-3 space-y-2">
-          <p className="text-zinc-400 text-xs uppercase">Tipografia</p>
+        <div className="card p-3 space-y-2">
+          <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Tipografia</p>
           <div className="grid grid-cols-2 gap-2">
-            <select value={form.fontFamily} onChange={(e) => setForm({ ...form, fontFamily: e.target.value })} className="bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-xs">
+            <select value={form.fontFamily} onChange={(e) => setForm({ ...form, fontFamily: e.target.value })} className="input-field px-2 py-1 text-xs">
               {FONT_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
-            <select value={form.fontWeight} onChange={(e) => setForm({ ...form, fontWeight: e.target.value })} className="bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-xs">
+            <select value={form.fontWeight} onChange={(e) => setForm({ ...form, fontWeight: e.target.value })} className="input-field px-2 py-1 text-xs">
               <option value="300">Light</option>
               <option value="400">Normal</option>
               <option value="600">Semi-Bold</option>
@@ -165,11 +189,15 @@ export function ThemesTab() {
             </select>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-zinc-500 text-xs">Cor:</span>
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Cor:</span>
             <input type="color" value={form.fontColor} onChange={(e) => setForm({ ...form, fontColor: e.target.value })} className="w-8 h-8 rounded cursor-pointer" />
-            <span className="text-zinc-500 text-xs">Alinhamento:</span>
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Alinhamento:</span>
             {(["left", "center", "right"] as const).map((a) => (
-              <button key={a} onClick={() => setForm({ ...form, textAlign: a })} className={`px-2 py-1 rounded text-xs ${form.textAlign === a ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>
+              <button
+                key={a}
+                onClick={() => setForm({ ...form, textAlign: a })}
+                className={`px-2 py-1 rounded text-xs ${form.textAlign === a ? "btn btn-primary" : "btn btn-secondary"}`}
+              >
                 {a === "left" ? "Esq" : a === "center" ? "Centro" : "Dir"}
               </button>
             ))}
@@ -177,16 +205,22 @@ export function ThemesTab() {
         </div>
 
         {/* Transition */}
-        <div className="bg-zinc-800 rounded-lg p-3 space-y-2">
-          <p className="text-zinc-400 text-xs uppercase">Transicao</p>
+        <div className="card p-3 space-y-2">
+          <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Transicao</p>
           <div className="flex gap-2">
             {TRANSITIONS.map((t) => (
-              <button key={t.value} onClick={() => setForm({ ...form, transition: t.value })} className={`px-3 py-1 rounded text-xs ${form.transition === t.value ? "bg-blue-600 text-white" : "bg-zinc-700 text-zinc-300"}`}>{t.label}</button>
+              <button
+                key={t.value}
+                onClick={() => setForm({ ...form, transition: t.value })}
+                className={`px-3 py-1 rounded text-xs ${form.transition === t.value ? "btn btn-primary" : "btn btn-secondary"}`}
+              >
+                {t.label}
+              </button>
             ))}
           </div>
         </div>
 
-        <button onClick={handleSave} disabled={!form.name.trim()} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50">
+        <button onClick={handleSave} disabled={!form.name.trim()} className="btn btn-primary disabled:opacity-50">
           {editing ? "Salvar Alteracoes" : "Criar Tema"}
         </button>
       </div>
@@ -196,19 +230,19 @@ export function ThemesTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-zinc-400 uppercase">Temas ({themes.length})</h3>
-        <button onClick={() => { resetForm(); setShowCreate(true); }} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-500">
+        <h3 className="text-sm font-medium uppercase" style={{ color: "var(--color-text-secondary)" }}>Temas ({themes.length})</h3>
+        <button onClick={() => { resetForm(); setShowCreate(true); }} className="btn btn-primary text-xs">
           + Novo Tema
         </button>
       </div>
 
       {themes.length === 0 && (
-        <p className="text-zinc-500 text-sm">Nenhum tema criado. Crie um tema para personalizar a aparencia da projecao.</p>
+        <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Nenhum tema criado. Crie um tema para personalizar a aparencia da projecao.</p>
       )}
 
       <div className="grid grid-cols-2 gap-3">
         {themes.map((theme: any) => (
-          <div key={theme.id} className="bg-zinc-800 rounded-lg overflow-hidden">
+          <div key={theme.id} className="card overflow-hidden" style={{ padding: 0 }}>
             {/* Mini preview */}
             <div
               className="aspect-video flex items-center justify-center"
@@ -225,13 +259,13 @@ export function ThemesTab() {
             </div>
             <div className="p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-white text-sm font-medium">{theme.name}</p>
-                {theme.isDefault && <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded">Padrao</span>}
+                <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>{theme.name}</p>
+                {theme.isDefault && <span className="badge badge-success">Padrao</span>}
               </div>
               <div className="flex gap-1.5">
-                <button onClick={() => setDefaultTheme(theme.id)} className="text-xs text-blue-400 hover:underline">Definir padrao</button>
-                <button onClick={() => startEdit(theme)} className="text-xs text-zinc-400 hover:text-white">Editar</button>
-                <button onClick={() => deleteTheme(theme.id)} className="text-xs text-red-400 hover:text-red-300">Excluir</button>
+                <button onClick={() => setDefaultTheme(theme.id)} className="text-xs hover:underline" style={{ color: "var(--color-accent)" }}>Definir padrao</button>
+                <button onClick={() => startEdit(theme)} className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Editar</button>
+                <button onClick={() => deleteTheme(theme.id)} className="text-xs" style={{ color: "var(--color-danger)" }}>Excluir</button>
               </div>
             </div>
           </div>

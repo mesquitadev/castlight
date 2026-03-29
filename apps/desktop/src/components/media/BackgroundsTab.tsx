@@ -37,27 +37,27 @@ export function BackgroundsTab() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <input ref={fileRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleUpload} />
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50">
+        <button onClick={() => fileRef.current?.click()} disabled={uploading} className="btn btn-primary disabled:opacity-50">
           {uploading ? "Enviando..." : "Importar Background"}
         </button>
       </div>
-      <div className="bg-zinc-800 rounded-lg p-4 space-y-3">
-        <h3 className="text-sm font-medium text-zinc-400 uppercase">Cor solida</h3>
+      <div className="card p-4 space-y-3">
+        <h3 className="text-sm font-medium uppercase" style={{ color: "var(--color-text-secondary)" }}>Cor solida</h3>
         <div className="flex items-center gap-3">
           <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded cursor-pointer" />
-          <span className="text-zinc-400 text-sm font-mono">{color}</span>
-          <button onClick={() => applyBackground({ type: "color", value: color })} className="px-3 py-1.5 bg-zinc-700 text-white rounded text-sm hover:bg-zinc-600">Aplicar</button>
-          <button onClick={() => { dispatch(setBackground(null)); }} className="px-3 py-1.5 bg-zinc-700 text-white rounded text-sm hover:bg-zinc-600">Limpar</button>
+          <span className="text-sm" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-mono)" }}>{color}</span>
+          <button onClick={() => applyBackground({ type: "color", value: color })} className="btn btn-secondary">Aplicar</button>
+          <button onClick={() => { dispatch(setBackground(null)); }} className="btn btn-secondary">Limpar</button>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-3">
         {backgrounds.map((bg) => (
-          <div key={bg.id} className="group relative bg-zinc-800 rounded-lg overflow-hidden">
+          <div key={bg.id} className="group relative card overflow-hidden" style={{ padding: 0 }}>
             <button onClick={() => applyBackground({ type: "image", value: `/api/media/file/${bg.id}` })} className="w-full">
               <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`} alt={bg.originalFilename} className="w-full aspect-video object-cover" />
             </button>
             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => deleteMedia(bg.id)} className="bg-red-600 text-white text-xs px-2 py-1 rounded">X</button>
+              <button onClick={() => deleteMedia(bg.id)} className="btn btn-danger text-xs px-2 py-1">X</button>
             </div>
           </div>
         ))}

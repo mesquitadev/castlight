@@ -48,14 +48,14 @@ export function LyricsPresenter({ song, onClose }: Props) {
     <div className="space-y-2">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">{song.title}</h3>
-          <p className="text-zinc-400 text-sm">{song.artist} {song.key && `• Tom: ${song.key}`}</p>
+          <h3 className="text-lg font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>{song.title}</h3>
+          <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{song.artist} {song.key && `• Tom: ${song.key}`}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleClear} className="px-3 py-1.5 bg-zinc-700 text-white rounded-lg text-sm hover:bg-zinc-600">
+          <button onClick={handleClear} className="btn btn-secondary">
             Limpar
           </button>
-          <button onClick={onClose} className="px-3 py-1.5 bg-zinc-700 text-white rounded-lg text-sm hover:bg-zinc-600">
+          <button onClick={onClose} className="btn btn-secondary">
             Fechar
           </button>
         </div>
@@ -64,10 +64,11 @@ export function LyricsPresenter({ song, onClose }: Props) {
         <button
           key={section.id}
           onClick={() => sendSection(i)}
-          className="w-full text-left bg-zinc-800 hover:bg-zinc-700 rounded-lg p-4 transition-colors"
+          className="card w-full text-left p-4 transition-colors"
+          style={{ display: "block" }}
         >
-          <span className="text-blue-400 text-xs font-medium uppercase">{section.label}</span>
-          <p className="text-white mt-1 whitespace-pre-line">{section.text}</p>
+          <span className="text-xs font-medium uppercase" style={{ color: "var(--color-accent)" }}>{section.label}</span>
+          <p className="mt-1 whitespace-pre-line" style={{ color: "var(--color-text-primary)" }}>{section.text}</p>
         </button>
       ))}
     </div>

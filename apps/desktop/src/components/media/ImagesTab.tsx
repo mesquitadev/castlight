@@ -36,20 +36,20 @@ export function ImagesTab() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50">
+        <button onClick={() => fileRef.current?.click()} disabled={uploading} className="btn btn-primary disabled:opacity-50">
           {uploading ? "Enviando..." : "Importar Imagem"}
         </button>
       </div>
       <div className="grid grid-cols-4 gap-3">
         {images.map((img) => (
-          <div key={img.id} className="group relative bg-zinc-800 rounded-lg overflow-hidden">
+          <div key={img.id} className="group relative card overflow-hidden" style={{ padding: 0 }}>
             <button onClick={() => handleProject(img.id, img.originalFilename)} className="w-full">
               <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${img.id}`} alt={img.originalFilename} className="w-full aspect-video object-cover" />
             </button>
             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => deleteMedia(img.id)} className="bg-red-600 text-white text-xs px-2 py-1 rounded">X</button>
+              <button onClick={() => deleteMedia(img.id)} className="btn btn-danger text-xs px-2 py-1">X</button>
             </div>
-            <p className="text-zinc-400 text-xs p-2 truncate">{img.originalFilename}</p>
+            <p className="text-xs p-2 truncate" style={{ color: "var(--color-text-secondary)" }}>{img.originalFilename}</p>
           </div>
         ))}
       </div>

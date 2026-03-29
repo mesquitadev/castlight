@@ -59,21 +59,21 @@ export function ProjectionTab() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-zinc-800 rounded-lg p-4 space-y-4">
+      <div className="card p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-zinc-400 uppercase">Area de projecao</h3>
-            <p className="text-zinc-500 text-xs mt-1">
+            <h3 className="text-sm font-medium uppercase" style={{ color: "var(--color-text-secondary)" }}>Area de projecao</h3>
+            <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
               Ajuste as margens pra definir a area visivel da projecao. As mudancas aparecem em tempo real nas telas.
             </p>
           </div>
-          <span className={`text-xs px-2 py-1 rounded ${area.enabled ? "bg-green-900/50 text-green-300" : "bg-zinc-700 text-zinc-400"}`}>
+          <span className={`badge ${area.enabled ? "badge-success" : ""}`} style={!area.enabled ? { background: "var(--color-surface-400)", color: "var(--color-text-secondary)" } : {}}>
             {area.enabled ? "Ativo" : "Tela inteira"}
           </span>
         </div>
 
         {/* Visual preview with margin indicators */}
-        <div className="relative bg-zinc-950 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9" }}>
+        <div className="relative rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "var(--color-surface-900)" }}>
           {/* Margin overlays (darkened areas = cropped) */}
           {/* Top */}
           <div className="absolute top-0 left-0 right-0 bg-red-500/20 border-b border-red-500/50 transition-all" style={{ height: `${area.top}%` }}>
@@ -108,8 +108,8 @@ export function ProjectionTab() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-400 text-xs">Cima</label>
-              <span className="text-zinc-500 text-xs font-mono">{area.top}%</span>
+              <label className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Cima</label>
+              <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>{area.top}%</span>
             </div>
             <input
               type="range"
@@ -117,13 +117,14 @@ export function ProjectionTab() {
               max={50}
               value={area.top}
               onChange={(e) => updateMargin("top", parseInt(e.target.value))}
-              className="w-full accent-blue-500"
+              className="w-full"
+              style={{ accentColor: "var(--color-accent)" }}
             />
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-400 text-xs">Baixo</label>
-              <span className="text-zinc-500 text-xs font-mono">{area.bottom}%</span>
+              <label className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Baixo</label>
+              <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>{area.bottom}%</span>
             </div>
             <input
               type="range"
@@ -131,13 +132,14 @@ export function ProjectionTab() {
               max={50}
               value={area.bottom}
               onChange={(e) => updateMargin("bottom", parseInt(e.target.value))}
-              className="w-full accent-blue-500"
+              className="w-full"
+              style={{ accentColor: "var(--color-accent)" }}
             />
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-400 text-xs">Esquerda</label>
-              <span className="text-zinc-500 text-xs font-mono">{area.left}%</span>
+              <label className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Esquerda</label>
+              <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>{area.left}%</span>
             </div>
             <input
               type="range"
@@ -145,13 +147,14 @@ export function ProjectionTab() {
               max={50}
               value={area.left}
               onChange={(e) => updateMargin("left", parseInt(e.target.value))}
-              className="w-full accent-blue-500"
+              className="w-full"
+              style={{ accentColor: "var(--color-accent)" }}
             />
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-zinc-400 text-xs">Direita</label>
-              <span className="text-zinc-500 text-xs font-mono">{area.right}%</span>
+              <label className="text-xs" style={{ color: "var(--color-text-secondary)" }}>Direita</label>
+              <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>{area.right}%</span>
             </div>
             <input
               type="range"
@@ -159,7 +162,8 @@ export function ProjectionTab() {
               max={50}
               value={area.right}
               onChange={(e) => updateMargin("right", parseInt(e.target.value))}
-              className="w-full accent-blue-500"
+              className="w-full"
+              style={{ accentColor: "var(--color-accent)" }}
             />
           </div>
         </div>
@@ -167,29 +171,29 @@ export function ProjectionTab() {
         {/* Precise inputs */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <label className="text-zinc-500 text-xs">C:</label>
-            <input type="number" min={0} max={50} value={area.top} onChange={(e) => updateMargin("top", parseInt(e.target.value) || 0)} className="w-14 bg-zinc-700 border border-zinc-600 rounded px-1.5 py-1 text-white text-xs text-center" />
+            <label className="text-xs" style={{ color: "var(--color-text-muted)" }}>C:</label>
+            <input type="number" min={0} max={50} value={area.top} onChange={(e) => updateMargin("top", parseInt(e.target.value) || 0)} className="input-field w-14 px-1.5 py-1 text-xs text-center" />
           </div>
           <div className="flex items-center gap-1">
-            <label className="text-zinc-500 text-xs">B:</label>
-            <input type="number" min={0} max={50} value={area.bottom} onChange={(e) => updateMargin("bottom", parseInt(e.target.value) || 0)} className="w-14 bg-zinc-700 border border-zinc-600 rounded px-1.5 py-1 text-white text-xs text-center" />
+            <label className="text-xs" style={{ color: "var(--color-text-muted)" }}>B:</label>
+            <input type="number" min={0} max={50} value={area.bottom} onChange={(e) => updateMargin("bottom", parseInt(e.target.value) || 0)} className="input-field w-14 px-1.5 py-1 text-xs text-center" />
           </div>
           <div className="flex items-center gap-1">
-            <label className="text-zinc-500 text-xs">E:</label>
-            <input type="number" min={0} max={50} value={area.left} onChange={(e) => updateMargin("left", parseInt(e.target.value) || 0)} className="w-14 bg-zinc-700 border border-zinc-600 rounded px-1.5 py-1 text-white text-xs text-center" />
+            <label className="text-xs" style={{ color: "var(--color-text-muted)" }}>E:</label>
+            <input type="number" min={0} max={50} value={area.left} onChange={(e) => updateMargin("left", parseInt(e.target.value) || 0)} className="input-field w-14 px-1.5 py-1 text-xs text-center" />
           </div>
           <div className="flex items-center gap-1">
-            <label className="text-zinc-500 text-xs">D:</label>
-            <input type="number" min={0} max={50} value={area.right} onChange={(e) => updateMargin("right", parseInt(e.target.value) || 0)} className="w-14 bg-zinc-700 border border-zinc-600 rounded px-1.5 py-1 text-white text-xs text-center" />
+            <label className="text-xs" style={{ color: "var(--color-text-muted)" }}>D:</label>
+            <input type="number" min={0} max={50} value={area.right} onChange={(e) => updateMargin("right", parseInt(e.target.value) || 0)} className="input-field w-14 px-1.5 py-1 text-xs text-center" />
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-2">
-          <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500">
+          <button onClick={handleSave} className="btn btn-primary">
             Salvar
           </button>
-          <button onClick={handleReset} className="px-4 py-2 bg-zinc-700 text-white rounded-lg text-sm hover:bg-zinc-600">
+          <button onClick={handleReset} className="btn btn-secondary">
             Resetar (tela inteira)
           </button>
         </div>

@@ -94,16 +94,24 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Nova Musica</h2>
-        <button onClick={onClose} className="text-zinc-400 hover:text-white text-sm">Cancelar</button>
+        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Nova Musica</h2>
+        <button onClick={onClose} className="text-sm" style={{ color: "var(--color-text-muted)" }}>Cancelar</button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-zinc-800">
-        <button onClick={() => setTab("create")} className={`px-4 py-2 text-sm font-medium ${tab === "create" ? "text-white border-b-2 border-blue-500" : "text-zinc-400"}`}>
+      <div className="flex gap-1" style={{ borderBottom: "1px solid var(--color-surface-300)" }}>
+        <button
+          onClick={() => setTab("create")}
+          className="px-4 py-2 text-sm font-medium"
+          style={tab === "create" ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" } : { color: "var(--color-text-muted)" }}
+        >
           Criar manualmente
         </button>
-        <button onClick={() => setTab("search")} className={`px-4 py-2 text-sm font-medium ${tab === "search" ? "text-white border-b-2 border-blue-500" : "text-zinc-400"}`}>
+        <button
+          onClick={() => setTab("search")}
+          className="px-4 py-2 text-sm font-medium"
+          style={tab === "search" ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" } : { color: "var(--color-text-muted)" }}
+        >
           Buscar online
         </button>
       </div>
@@ -117,9 +125,9 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-white placeholder-zinc-500"
+              className="input-field flex-1"
             />
-            <button onClick={handleSearch} disabled={searching} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 disabled:opacity-50">
+            <button onClick={handleSearch} disabled={searching} className="btn btn-primary disabled:opacity-50">
               {searching ? "Buscando..." : "Buscar"}
             </button>
           </div>
@@ -128,10 +136,11 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
               key={i}
               onClick={() => handleSelectOnline(result)}
               disabled={loadingText}
-              className="w-full text-left bg-zinc-800 rounded-lg p-3 hover:bg-zinc-700 transition-colors"
+              className="card w-full text-left p-3 transition-colors"
+              style={{ display: "block" }}
             >
-              <p className="text-white font-medium">{result.title}</p>
-              <p className="text-zinc-400 text-sm">{result.artist}</p>
+              <p className="font-medium" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
             </button>
           ))}
         </div>
@@ -141,19 +150,20 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
         <div className="space-y-4">
           {/* Song info */}
           <div className="grid grid-cols-3 gap-3">
-            <input type="text" placeholder="Titulo *" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-500" />
-            <input type="text" placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} className="col-span-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-500" />
-            <input type="text" placeholder="Tom (ex: G, Am)" value={key} onChange={(e) => setKey(e.target.value)} className="col-span-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-500" />
+            <input type="text" placeholder="Titulo *" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field col-span-1" />
+            <input type="text" placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} className="input-field col-span-1" />
+            <input type="text" placeholder="Tom (ex: G, Am)" value={key} onChange={(e) => setKey(e.target.value)} className="input-field col-span-1" />
           </div>
 
           {/* Quick paste area */}
           <div>
-            <p className="text-zinc-400 text-xs mb-1">Cole a letra inteira (separe secoes com linha em branco):</p>
+            <p className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Cole a letra inteira (separe secoes com linha em branco):</p>
             <textarea
               value={lyricsText}
               onChange={(e) => handleTextChange(e.target.value)}
               rows={6}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-500 resize-none font-mono"
+              className="input-field w-full resize-none"
+              style={{ fontFamily: "var(--font-mono)" }}
               placeholder={"Verso 1 aqui\nSegunda linha\n\nRefrao aqui\nSegunda linha do refrao\n\nVerso 2 aqui"}
             />
           </div>
@@ -162,16 +172,16 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
           {sections.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-zinc-400 text-xs uppercase">Secoes ({sections.length})</p>
-                <button onClick={addSection} className="text-xs text-blue-400 hover:underline">+ Adicionar secao</button>
+                <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Secoes ({sections.length})</p>
+                <button onClick={addSection} className="text-xs hover:underline" style={{ color: "var(--color-accent)" }}>+ Adicionar secao</button>
               </div>
               {sections.map((section, i) => (
-                <div key={i} className="bg-zinc-800 rounded-lg p-3 space-y-2">
+                <div key={i} className="card p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <select
                       value={section.type}
                       onChange={(e) => updateSection(i, "type", e.target.value)}
-                      className="bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-xs"
+                      className="input-field px-2 py-1 text-xs"
                     >
                       {SECTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
@@ -179,15 +189,16 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
                       type="text"
                       value={section.label}
                       onChange={(e) => updateSection(i, "label", e.target.value)}
-                      className="flex-1 bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-xs"
+                      className="input-field flex-1 px-2 py-1 text-xs"
                     />
-                    <button onClick={() => removeSection(i)} className="text-red-400 text-xs hover:text-red-300">Remover</button>
+                    <button onClick={() => removeSection(i)} className="text-xs" style={{ color: "var(--color-danger)" }}>Remover</button>
                   </div>
                   <textarea
                     value={section.text}
                     onChange={(e) => updateSection(i, "text", e.target.value)}
                     rows={3}
-                    className="w-full bg-zinc-700 border border-zinc-600 rounded px-2 py-1.5 text-white text-sm resize-none font-mono"
+                    className="input-field w-full px-2 py-1.5 text-sm resize-none"
+                    style={{ fontFamily: "var(--font-mono)" }}
                   />
                 </div>
               ))}
@@ -198,7 +209,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
           <button
             onClick={handleSave}
             disabled={creating || !title.trim() || sections.length === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
+            className="btn btn-primary disabled:opacity-50"
           >
             {creating ? "Salvando..." : "Salvar Musica"}
           </button>

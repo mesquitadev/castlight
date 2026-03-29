@@ -16,31 +16,31 @@ export function StreamTab() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-zinc-800 rounded-lg p-4 space-y-4">
-        <h3 className="text-sm font-medium text-zinc-400 uppercase">Elementos visiveis no stream</h3>
+      <div className="card p-4 space-y-4">
+        <h3 className="text-sm font-medium uppercase" style={{ color: "var(--color-text-secondary)" }}>Elementos visiveis no stream</h3>
         {([["showLyrics", "Letras"], ["showBible", "Versiculos"], ["showLowerThird", "Lower Third"], ["showLogo", "Logo da igreja"]] as const).map(([key, label]) => (
           <label key={key} className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={config[key]} onChange={(e) => update(key, e.target.checked)} className="w-4 h-4 rounded" />
-            <span className="text-white text-sm">{label}</span>
+            <span className="text-sm" style={{ color: "var(--color-text-primary)" }}>{label}</span>
           </label>
         ))}
       </div>
-      <div className="bg-zinc-800 rounded-lg p-4 space-y-4">
-        <h3 className="text-sm font-medium text-zinc-400 uppercase">Lower Third</h3>
+      <div className="card p-4 space-y-4">
+        <h3 className="text-sm font-medium uppercase" style={{ color: "var(--color-text-secondary)" }}>Lower Third</h3>
         <div className="flex items-center gap-3">
-          <span className="text-white text-sm">Cor:</span>
+          <span className="text-sm" style={{ color: "var(--color-text-primary)" }}>Cor:</span>
           <input type="color" value={config.lowerThirdColor} onChange={(e) => update("lowerThirdColor", e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
-          <span className="text-zinc-400 text-sm font-mono">{config.lowerThirdColor}</span>
+          <span className="text-sm" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-mono)" }}>{config.lowerThirdColor}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-white text-sm">Posicao:</span>
-          <select value={config.lowerThirdPosition} onChange={(e) => update("lowerThirdPosition", e.target.value as any)} className="bg-zinc-700 border border-zinc-600 rounded px-3 py-1.5 text-white text-sm">
+          <span className="text-sm" style={{ color: "var(--color-text-primary)" }}>Posicao:</span>
+          <select value={config.lowerThirdPosition} onChange={(e) => update("lowerThirdPosition", e.target.value as any)} className="input-field px-3 py-1.5 text-sm">
             <option value="bottom">Inferior</option>
             <option value="top">Superior</option>
           </select>
         </div>
       </div>
-      <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500">Salvar Configuracoes</button>
+      <button onClick={handleSave} className="btn btn-primary">Salvar Configuracoes</button>
     </div>
   );
 }

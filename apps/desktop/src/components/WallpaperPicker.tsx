@@ -85,26 +85,27 @@ export function WallpaperPicker() {
   };
 
   return (
-    <div className="bg-zinc-800 rounded-xl p-4 space-y-3">
+    <div className="card p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-zinc-400 text-sm">Papel de parede do culto</p>
+        <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Papel de parede do culto</p>
         <div className="flex gap-2">
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="text-xs text-blue-400 hover:underline disabled:opacity-50"
+            className="text-xs hover:underline disabled:opacity-50"
+            style={{ color: "var(--color-accent)" }}
           >
             {uploading ? "Enviando..." : "Importar"}
           </button>
-          <button onClick={clearWallpaper} className="text-xs text-zinc-500 hover:text-white">
+          <button onClick={clearWallpaper} className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             Limpar
           </button>
         </div>
       </div>
 
       {/* Current wallpaper preview */}
-      <div className="aspect-video rounded-lg overflow-hidden bg-zinc-900 flex items-center justify-center">
+      <div className="aspect-video rounded-lg overflow-hidden flex items-center justify-center" style={{ background: "var(--color-surface-900)" }}>
         {currentBg?.type === "image" ? (
           <img
             src={`http://localhost:${SIDECAR_PORT}${currentBg.value}`}
@@ -114,7 +115,7 @@ export function WallpaperPicker() {
         ) : currentBg?.type === "color" && currentBg.value !== "#000000" ? (
           <div className="w-full h-full" style={{ backgroundColor: currentBg.value }} />
         ) : (
-          <p className="text-zinc-600 text-sm">Nenhum papel de parede definido</p>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Nenhum papel de parede definido</p>
         )}
       </div>
 
@@ -125,11 +126,7 @@ export function WallpaperPicker() {
             key={opt.value}
             onClick={() => changeFit(opt.value)}
             title={opt.desc}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-              fit === opt.value
-                ? "bg-blue-600 text-white"
-                : "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
-            }`}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${fit === opt.value ? "btn btn-primary" : "btn btn-secondary"}`}
           >
             {opt.label}
           </button>
@@ -145,7 +142,8 @@ export function WallpaperPicker() {
               <button
                 key={bg.id}
                 onClick={() => applyWallpaper({ type: "image", value: `/api/media/file/${bg.id}` })}
-                className={`aspect-video rounded overflow-hidden ${isActive ? "ring-2 ring-blue-500" : "hover:ring-1 hover:ring-zinc-600"}`}
+                className={`aspect-video rounded overflow-hidden ${isActive ? "ring-2" : "hover:ring-1"}`}
+                style={isActive ? { outline: `2px solid var(--color-accent)` } : {}}
               >
                 <img
                   src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`}

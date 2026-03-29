@@ -29,17 +29,21 @@ export function Media() {
 
   return (
     <div className="p-6 space-y-4">
-      <h2 className="text-xl font-semibold text-white">Midia</h2>
-      <div className="flex gap-1 border-b border-zinc-800">
+      <div>
+        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Midia</h2>
+        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie slides, imagens, videos e avisos</p>
+      </div>
+      <div className="flex gap-1" style={{ borderBottom: "1px solid var(--color-surface-300)" }}>
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
+            className="px-4 py-2 text-sm font-medium transition-colors"
+            style={
               activeTab === tab.id
-                ? "text-white border-b-2 border-blue-500"
-                : "text-zinc-400 hover:text-white"
-            }`}
+                ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" }
+                : { color: "var(--color-text-muted)" }
+            }
           >
             {tab.label}
           </button>

@@ -43,23 +43,24 @@ function ScreenCard({ screen }: { screen: ScreenInfo }) {
   };
 
   return (
-    <li className="bg-zinc-800 rounded-lg p-4 space-y-3">
+    <li className="card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-white font-medium">{screen.name || "Dispositivo sem nome"}</p>
-          <p className="text-zinc-500 text-xs">
+          <p className="font-medium" style={{ color: "var(--color-text-primary)" }}>{screen.name || "Dispositivo sem nome"}</p>
+          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             {screen.resolution.width}x{screen.resolution.height} — {screen.userAgent.slice(0, 40)}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => identifyScreen(screen.id)}
-            className="text-xs text-zinc-500 hover:text-white transition-colors"
+            className="text-xs transition-colors"
+            style={{ color: "var(--color-text-muted)" }}
           >
             Identificar
           </button>
           {selectedRole && (
-            <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
+            <span className="badge badge-accent">
               {ROLE_OPTIONS.find((r) => r.value === selectedRole)?.label}
             </span>
           )}
@@ -69,22 +70,21 @@ function ScreenCard({ screen }: { screen: ScreenInfo }) {
       {!adopted ? (
         <button
           onClick={handleAdopt}
-          className="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-500 transition-colors"
+          className="btn btn-primary w-full"
+          style={{ background: "var(--color-success)" }}
         >
           Adotar esta tela
         </button>
       ) : (
         <div className="space-y-2">
-          <p className="text-zinc-400 text-xs uppercase">Selecione o papel:</p>
+          <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Selecione o papel:</p>
           <div className="grid grid-cols-3 gap-2">
             {ROLE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => handleAssignRole(opt.value)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedRole === opt.value
-                    ? "bg-blue-600 text-white"
-                    : "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
+                  selectedRole === opt.value ? "btn btn-primary" : "btn btn-secondary"
                 }`}
               >
                 {opt.label}
@@ -104,20 +104,27 @@ export function Screens() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Telas Conectadas</h2>
+        <div>
+          <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Telas Conectadas</h2>
+          <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie dispositivos na rede</p>
+        </div>
         <button
           onClick={() => dispatch(toggleQRDialog())}
-          className="px-4 py-2 bg-zinc-700 text-white rounded-lg text-sm hover:bg-zinc-600"
+          className="btn btn-secondary"
         >
           QR Code
         </button>
       </div>
 
       {screens.length === 0 ? (
-        <div className="bg-zinc-800 rounded-xl p-8 text-center space-y-3">
-          <p className="text-zinc-400 text-lg">Nenhuma tela conectada</p>
-          <p className="text-zinc-500 text-sm">
-            Dispositivos na rede podem acessar <span className="text-blue-400 font-mono">http://localhost:{SIDECAR_PORT}</span> para se conectar.
+        <div className="card p-8 text-center space-y-3">
+          <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>Nenhuma tela conectada</p>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Dispositivos na rede podem acessar{" "}
+            <span style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}>
+              http://localhost:{SIDECAR_PORT}
+            </span>{" "}
+            para se conectar.
           </p>
         </div>
       ) : (
