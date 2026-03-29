@@ -4,9 +4,13 @@ import {
   useGetBibleVersionsQuery,
   useGetBibleBooksQuery,
   useGetBibleVersesQuery,
+  useGetMediaFilesQuery,
+  useGetSettingQuery,
+  useSaveSettingMutation,
 } from "../store/api";
 import { presentBible, clearPresentation } from "../store/slices/presentation";
 import { SIDECAR_PORT, ScreenRole } from "@castlight/shared";
+import type { BackgroundConfig } from "@castlight/shared";
 
 const BOOK_CATEGORIES: Record<string, { color: string; bg: string }> = {
   // Pentateuco
@@ -104,18 +108,41 @@ function broadcastClear() {
   });
 }
 
+function broadcastBackground(config: BackgroundConfig) {
+  fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event: "background:change",
+      roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor],
+      data: config,
+    }),
+  });
+}
+
 export function BibleNavigator() {
   const dispatch = useDispatch();
   const [version, setVersion] = useState("acf");
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
+  const [bibleBg, setBibleBg] = useState<BackgroundConfig | null>(null);
   const verseListRef = useRef<HTMLDivElement>(null);
   const verseRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
   const { data: versions = [] } = useGetBibleVersionsQuery();
   const { data: books = [] } = useGetBibleBooksQuery(version);
+  const { data: backgrounds = [] } = useGetMediaFilesQuery("background");
+  const { data: savedBibleBg } = useGetSettingQuery("bible_background");
+  const [saveSetting] = useSaveSettingMutation();
   const currentBook = books.find((b) => b.name === selectedBook);
+
+  // Load saved bible background
+  useEffect(() => {
+    if (savedBibleBg && !bibleBg) {
+      setBibleBg(savedBibleBg as BackgroundConfig);
+    }
+  }, [savedBibleBg, bibleBg]);
 
   const { data: verses = [] } = useGetBibleVersesQuery(
     selectedBook && selectedChapter
@@ -139,6 +166,8 @@ export function BibleNavigator() {
     if (verseData.length === 0) return;
     setSelectedVerse(verseNum);
     dispatch(presentBible({ verses: verseData, reference: ref }));
+    // Send bible-specific background first (if set)
+    if (bibleBg) broadcastBackground(bibleBg);
     fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,17 +177,21 @@ export function BibleNavigator() {
         data: { verses: verseData, reference: ref },
       }),
     });
-  }, [selectedBook, selectedChapter, version, verses, dispatch]);
+  }, [selectedBook, selectedChapter, version, verses, dispatch, bibleBg]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Esc — clear presentation (go back to wallpaper)
+      // Esc — clear presentation (restore worship wallpaper)
       if (e.key === "Escape") {
         e.preventDefault();
         setSelectedVerse(null);
         dispatch(clearPresentation());
         broadcastClear();
+        // Restore worship wallpaper
+        fetch(`http://localhost:${SIDECAR_PORT}/api/settings/default_wallpaper`)
+          .then((r) => r.json())
+          .then((config) => { if (config?.type) broadcastBackground(config); });
         return;
       }
 
@@ -201,6 +234,36 @@ export function BibleNavigator() {
               <option key={v.id} value={v.id}>{v.id.toUpperCase()}</option>
             ))}
           </select>
+        </div>
+
+        {/* Bible background picker */}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-850 border-b border-zinc-700">
+          <span className="text-zinc-500 text-xs">Fundo:</span>
+          <button
+            onClick={() => { setBibleBg(null); saveSetting({ key: "bible_background", value: null }); }}
+            className={`w-6 h-6 rounded border ${!bibleBg ? "ring-2 ring-blue-500 border-blue-500" : "border-zinc-600"} bg-zinc-950`}
+            title="Sem fundo (usa papel de parede)"
+          />
+          {backgrounds.map((bg) => {
+            const config: BackgroundConfig = { type: "image", value: `/api/media/file/${bg.id}` };
+            const isActive = bibleBg?.value === config.value;
+            return (
+              <button
+                key={bg.id}
+                onClick={() => { setBibleBg(config); saveSetting({ key: "bible_background", value: config }); }}
+                className={`w-6 h-6 rounded overflow-hidden ${isActive ? "ring-2 ring-blue-500" : "border border-zinc-600"}`}
+                title={bg.originalFilename}
+              >
+                <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`} className="w-full h-full object-cover" alt="" />
+              </button>
+            );
+          })}
+          <input
+            type="color"
+            className="w-6 h-6 rounded cursor-pointer border-0 p-0"
+            onChange={(e) => { const c: BackgroundConfig = { type: "color", value: e.target.value }; setBibleBg(c); saveSetting({ key: "bible_background", value: c }); }}
+            title="Cor solida"
+          />
         </div>
 
         {/* Verse list */}

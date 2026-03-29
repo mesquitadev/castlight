@@ -121,24 +121,23 @@ function createRenderer(contentLayer, backgroundLayer) {
     var container = document.querySelector(".screen-container");
     if (!container) return;
     if (!area.enabled) {
+      container.style.top = "0";
+      container.style.bottom = "0";
+      container.style.left = "0";
+      container.style.right = "0";
       container.style.width = "100vw";
       container.style.height = "100vh";
-      container.style.margin = "0";
-      container.style.border = "none";
+      container.style.position = "fixed";
+      container.style.transform = "none";
     } else {
-      // Scale to fit within the viewport while maintaining the defined aspect ratio
-      var viewW = window.innerWidth;
-      var viewH = window.innerHeight;
-      var scale = Math.min(viewW / area.width, viewH / area.height);
-      var w = Math.round(area.width * scale);
-      var h = Math.round(area.height * scale);
-      container.style.width = w + "px";
-      container.style.height = h + "px";
-      container.style.margin = "auto";
-      container.style.position = "absolute";
-      container.style.top = "50%";
-      container.style.left = "50%";
-      container.style.transform = "translate(-50%, -50%)";
+      container.style.position = "fixed";
+      container.style.top = area.top + "%";
+      container.style.bottom = area.bottom + "%";
+      container.style.left = area.left + "%";
+      container.style.right = area.right + "%";
+      container.style.width = "auto";
+      container.style.height = "auto";
+      container.style.transform = "none";
     }
   }
 

@@ -46,7 +46,9 @@ export interface BackgroundConfig {
 }
 
 export interface ProjectionArea {
-  width: number;
-  height: number;
   enabled: boolean;
+  top: number;    // percentage from top (0-50)
+  bottom: number; // percentage from bottom (0-50)
+  left: number;   // percentage from left (0-50)
+  right: number;  // percentage from right (0-50)
 }
