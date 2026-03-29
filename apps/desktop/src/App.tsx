@@ -6,12 +6,14 @@ import { Dashboard } from "./pages/Dashboard";
 import { Lyrics } from "./pages/Lyrics";
 import { Bible } from "./pages/Bible";
 import { Screens } from "./pages/Screens";
+import { Media } from "./pages/Media";
 
 const PAGES = {
   dashboard: Dashboard,
   lyrics: Lyrics,
   bible: Bible,
   screens: Screens,
+  media: Media,
 } as const;
 
 export function App() {
