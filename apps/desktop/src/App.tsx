@@ -6,7 +6,6 @@ import { Dashboard } from "./pages/Dashboard";
 import { Lyrics } from "./pages/Lyrics";
 import { Bible } from "./pages/Bible";
 import { Screens } from "./pages/Screens";
-import { Media } from "./pages/Media";
 import { Settings } from "./pages/Settings";
 
 const PAGES = {
@@ -14,19 +13,18 @@ const PAGES = {
   lyrics: Lyrics,
   bible: Bible,
   screens: Screens,
-  media: Media,
   settings: Settings,
 } as const;
 
 export function App() {
   useSocket();
   const activePanel = useSelector((s: RootState) => s.ui.activePanel);
-  const Page = PAGES[activePanel];
+  const Page = PAGES[activePanel as keyof typeof PAGES] ?? Dashboard;
 
   return (
     <div className="flex h-screen" style={{ background: "var(--color-surface-50)", fontFamily: "var(--font-display)" }}>
       <Sidebar />
-      <main className="flex-1 overflow-y-auto relative">
+      <main className="flex-1 overflow-hidden relative">
         <div className="absolute inset-0 overflow-y-auto">
           <Page />
         </div>

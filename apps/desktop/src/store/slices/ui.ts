@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-type ActivePanel = "lyrics" | "bible" | "media" | "screens" | "settings" | "dashboard";
+type ActivePanel = "lyrics" | "bible" | "screens" | "settings" | "dashboard";
 
 interface UIState {
   activePanel: ActivePanel;
