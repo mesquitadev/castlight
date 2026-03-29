@@ -6,7 +6,7 @@ const SIDECAR_URL = "http://localhost:3100";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${SIDECAR_URL}/api` }),
-  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices", "OBS"],
+  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices", "OBS", "Bibles"],
   endpoints: (builder) => ({
     getSongs: builder.query<Song[], string | void>({
       query: (search) => search ? `/lyrics?q=${search}` : "/lyrics",
@@ -29,6 +29,19 @@ export const api = createApi({
     }),
     getBibleVersions: builder.query<BibleVersion[], void>({
       query: () => "/bible/versions",
+      providesTags: ["Bibles"],
+    }),
+    getAvailableBibles: builder.query<Array<BibleVersion & { installed: boolean }>, void>({
+      query: () => "/bible/available",
+      providesTags: ["Bibles"],
+    }),
+    downloadBible: builder.mutation<void, string>({
+      query: (versionId) => ({ url: `/bible/download/${versionId}`, method: "POST" }),
+      invalidatesTags: ["Bibles"],
+    }),
+    removeBible: builder.mutation<void, string>({
+      query: (versionId) => ({ url: `/bible/versions/${versionId}`, method: "DELETE" }),
+      invalidatesTags: ["Bibles"],
     }),
     getBibleBooks: builder.query<BibleBook[], string>({
       query: (versionId) => `/bible/versions/${versionId}/books`,
@@ -119,6 +132,9 @@ export const {
   useUpdateSongMutation,
   useDeleteSongMutation,
   useGetBibleVersionsQuery,
+  useGetAvailableBiblesQuery,
+  useDownloadBibleMutation,
+  useRemoveBibleMutation,
   useGetBibleBooksQuery,
   useGetBibleVersesQuery,
   useSearchBibleQuery,

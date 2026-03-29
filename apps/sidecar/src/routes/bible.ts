@@ -4,7 +4,28 @@ import type { BibleService } from "../services/bible";
 export function bibleRoutes(service: BibleService): Hono {
   const app = new Hono();
 
+  // Installed versions (for use)
   app.get("/versions", (c) => c.json(service.getVersions()));
+
+  // All available versions (installed + downloadable)
+  app.get("/available", (c) => c.json(service.getAvailableVersions()));
+
+  // Download a version from GitHub
+  app.post("/download/:versionId", async (c) => {
+    const versionId = c.req.param("versionId");
+    try {
+      await service.downloadVersion(versionId);
+      return c.json({ ok: true, message: `${versionId.toUpperCase()} baixada com sucesso` });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  // Remove an installed version
+  app.delete("/versions/:versionId", (c) => {
+    service.removeVersion(c.req.param("versionId"));
+    return c.json({ ok: true });
+  });
 
   app.get("/versions/:versionId/books", (c) => c.json(service.getBooks(c.req.param("versionId"))));
 

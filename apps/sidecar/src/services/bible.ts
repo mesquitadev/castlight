@@ -1,5 +1,5 @@
 import type { BibleVerse, BibleBook, BibleVersion, BibleReference } from "@castlight/shared";
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync, readdirSync, writeFileSync, existsSync, unlinkSync } from "fs";
 import { join } from "path";
 
 interface BibleData {
@@ -14,15 +14,105 @@ interface BibleData {
   }[];
 }
 
+// GitHub source format (damarals/biblias)
+interface GithubBibleBook {
+  abbrev: string;
+  name: string;
+  chapters: string[][]; // chapters[chapterIndex][verseIndex] = text
+}
+
+// Available versions from damarals/biblias
+const AVAILABLE_VERSIONS: Record<string, { name: string; language: string }> = {
+  ACF: { name: "Almeida Corrigida e Fiel", language: "pt" },
+  ARA: { name: "Almeida Revista e Atualizada", language: "pt" },
+  ARC: { name: "Almeida Revista e Corrigida", language: "pt" },
+  AS21: { name: "Almeida Seculo XXI", language: "pt" },
+  JFAA: { name: "Almeida Atualizada", language: "pt" },
+  KJA: { name: "King James Atualizada", language: "pt" },
+  KJF: { name: "King James Fiel", language: "pt" },
+  NAA: { name: "Nova Almeida Atualizada", language: "pt" },
+  NBV: { name: "Nova Biblia Viva", language: "pt" },
+  NTLH: { name: "Nova Traducao na Linguagem de Hoje", language: "pt" },
+  NVI: { name: "Nova Versao Internacional", language: "pt" },
+  NVT: { name: "Nova Versao Transformadora", language: "pt" },
+  TB: { name: "Traducao Brasileira", language: "pt" },
+};
+
+const GITHUB_BASE_URL = "https://raw.githubusercontent.com/damarals/biblias/master/inst/json";
+
 export class BibleService {
   private bibles = new Map<string, BibleData>();
+  private biblesDir: string;
 
   constructor(biblesDir: string) {
-    const files = readdirSync(biblesDir).filter((f) => f.endsWith(".json"));
+    this.biblesDir = biblesDir;
+    this.loadAll();
+  }
+
+  private loadAll(): void {
+    this.bibles.clear();
+    if (!existsSync(this.biblesDir)) return;
+    const files = readdirSync(this.biblesDir).filter((f) => f.endsWith(".json"));
     for (const file of files) {
-      const data: BibleData = JSON.parse(readFileSync(join(biblesDir, file), "utf-8"));
-      this.bibles.set(data.version.id, data);
+      try {
+        const data: BibleData = JSON.parse(readFileSync(join(this.biblesDir, file), "utf-8"));
+        this.bibles.set(data.version.id, data);
+      } catch {
+        // Skip invalid files
+      }
     }
+  }
+
+  // List all versions available for download (whether installed or not)
+  getAvailableVersions(): Array<BibleVersion & { installed: boolean }> {
+    return Object.entries(AVAILABLE_VERSIONS).map(([id, info]) => ({
+      id: id.toLowerCase(),
+      name: info.name,
+      language: info.language,
+      installed: this.bibles.has(id.toLowerCase()),
+    }));
+  }
+
+  // Download and convert a Bible version from GitHub
+  async downloadVersion(versionId: string): Promise<void> {
+    const upperKey = versionId.toUpperCase();
+    const info = AVAILABLE_VERSIONS[upperKey];
+    if (!info) throw new Error(`Versao desconhecida: ${versionId}`);
+
+    const url = `${GITHUB_BASE_URL}/${upperKey}.json`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Falha ao baixar ${upperKey}: ${response.status}`);
+
+    const githubData: GithubBibleBook[] = await response.json();
+    const converted = this.convertFromGithub(versionId.toLowerCase(), info.name, info.language, githubData);
+
+    writeFileSync(join(this.biblesDir, `${versionId.toLowerCase()}.json`), JSON.stringify(converted, null, 0));
+    this.bibles.set(versionId.toLowerCase(), converted);
+  }
+
+  // Remove an installed Bible version
+  removeVersion(versionId: string): void {
+    const filePath = join(this.biblesDir, `${versionId}.json`);
+    if (existsSync(filePath)) unlinkSync(filePath);
+    this.bibles.delete(versionId);
+  }
+
+  // Convert GitHub format to Castlight format
+  private convertFromGithub(id: string, name: string, language: string, data: GithubBibleBook[]): BibleData {
+    return {
+      version: { id, name, language },
+      books: data.map((book) => ({
+        name: book.name,
+        abbr: book.abbrev,
+        chapters: book.chapters.map((verses, chapterIndex) => ({
+          chapter: chapterIndex + 1,
+          verses: verses.map((text, verseIndex) => ({
+            verse: verseIndex + 1,
+            text,
+          })),
+        })),
+      })),
+    };
   }
 
   getVersions(): BibleVersion[] {
