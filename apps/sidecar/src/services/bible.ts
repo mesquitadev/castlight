@@ -22,20 +22,20 @@ interface GithubBibleBook {
 }
 
 // Available versions from damarals/biblias
-const AVAILABLE_VERSIONS: Record<string, { name: string; language: string }> = {
-  ACF: { name: "Almeida Corrigida e Fiel", language: "pt" },
-  ARA: { name: "Almeida Revista e Atualizada", language: "pt" },
-  ARC: { name: "Almeida Revista e Corrigida", language: "pt" },
-  AS21: { name: "Almeida Seculo XXI", language: "pt" },
-  JFAA: { name: "Almeida Atualizada", language: "pt" },
-  KJA: { name: "King James Atualizada", language: "pt" },
-  KJF: { name: "King James Fiel", language: "pt" },
-  NAA: { name: "Nova Almeida Atualizada", language: "pt" },
-  NBV: { name: "Nova Biblia Viva", language: "pt" },
-  NTLH: { name: "Nova Traducao na Linguagem de Hoje", language: "pt" },
-  NVI: { name: "Nova Versao Internacional", language: "pt" },
-  NVT: { name: "Nova Versao Transformadora", language: "pt" },
-  TB: { name: "Traducao Brasileira", language: "pt" },
+const AVAILABLE_VERSIONS: Record<string, { name: string; language: string; copyright: string }> = {
+  ACF: { name: "Almeida Corrigida e Fiel", language: "pt", copyright: "Sociedade Biblica Trinitariana do Brasil, 1994" },
+  ARA: { name: "Almeida Revista e Atualizada", language: "pt", copyright: "Sociedade Biblica do Brasil, 1993" },
+  ARC: { name: "Almeida Revista e Corrigida", language: "pt", copyright: "Sociedade Biblica do Brasil, 1995" },
+  AS21: { name: "Almeida Seculo XXI", language: "pt", copyright: "Edicoes Vida Nova, 2009" },
+  JFAA: { name: "Almeida Atualizada", language: "pt", copyright: "Sociedade Biblica do Brasil" },
+  KJA: { name: "King James Atualizada", language: "pt", copyright: "Abba Press, 1999" },
+  KJF: { name: "King James Fiel", language: "pt", copyright: "BV Films e Biblia King James, 1611/2012" },
+  NAA: { name: "Nova Almeida Atualizada", language: "pt", copyright: "Sociedade Biblica do Brasil, 2017" },
+  NBV: { name: "Nova Biblia Viva", language: "pt", copyright: "Editora Mundo Cristao, 2007" },
+  NTLH: { name: "Nova Traducao na Linguagem de Hoje", language: "pt", copyright: "Sociedade Biblica do Brasil, 2000" },
+  NVI: { name: "Nova Versao Internacional", language: "pt", copyright: "Biblica Inc., 2011" },
+  NVT: { name: "Nova Versao Transformadora", language: "pt", copyright: "Editora Mundo Cristao, 2016" },
+  TB: { name: "Traducao Brasileira", language: "pt", copyright: "Sociedade Biblica do Brasil, 2010" },
 };
 
 const GITHUB_BASE_URL = "https://raw.githubusercontent.com/damarals/biblias/master/inst/json";
@@ -64,12 +64,13 @@ export class BibleService {
   }
 
   // List all versions available for download (whether installed or not)
-  getAvailableVersions(): Array<BibleVersion & { installed: boolean }> {
+  getAvailableVersions(): Array<BibleVersion & { installed: boolean; copyright: string }> {
     return Object.entries(AVAILABLE_VERSIONS).map(([id, info]) => ({
       id: id.toLowerCase(),
       name: info.name,
       language: info.language,
       installed: this.bibles.has(id.toLowerCase()),
+      copyright: info.copyright,
     }));
   }
 

@@ -30,11 +30,11 @@ export function BiblesTab() {
         {installed.length === 0 && (
           <p className="text-zinc-500 text-sm">Nenhuma biblia instalada. Baixe uma versao abaixo.</p>
         )}
-        {installed.map((bible) => (
+        {installed.map((bible: any) => (
           <div key={bible.id} className="bg-zinc-800 rounded-lg p-4 flex items-center justify-between">
             <div>
               <p className="text-white font-medium">{bible.name}</p>
-              <p className="text-zinc-500 text-xs">{bible.id.toUpperCase()} — {bible.language.toUpperCase()}</p>
+              <p className="text-zinc-500 text-xs">{bible.id.toUpperCase()} — {bible.copyright}</p>
             </div>
             <button
               onClick={() => removeBible(bible.id)}
@@ -49,11 +49,11 @@ export function BiblesTab() {
       {/* Available for download */}
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-zinc-400 uppercase">Disponiveis para download ({available.length})</h3>
-        {available.map((bible) => (
+        {available.map((bible: any) => (
           <div key={bible.id} className="bg-zinc-800 rounded-lg p-4 flex items-center justify-between">
             <div>
               <p className="text-white font-medium">{bible.name}</p>
-              <p className="text-zinc-500 text-xs">{bible.id.toUpperCase()} — {bible.language.toUpperCase()}</p>
+              <p className="text-zinc-500 text-xs">{bible.id.toUpperCase()} — {bible.copyright}</p>
             </div>
             <button
               onClick={() => handleDownload(bible.id)}
