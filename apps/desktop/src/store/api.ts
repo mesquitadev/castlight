@@ -146,9 +146,12 @@ export const api = createApi({
       query: (id) => ({ url: `/themes/${id}`, method: "DELETE" }),
       invalidatesTags: ["Themes"],
     }),
-    // Online music search (Deezer)
-    searchOnlineLyrics: builder.query<Array<{ title: string; artist: string; albumCover: string; duration: number; source: string }>, string>({
+    // Online lyrics search (Genius)
+    searchOnlineLyrics: builder.query<Array<{ title: string; artist: string; lyricsUrl: string; thumbnail: string; source: string }>, string>({
       query: (q) => `/search/lyrics?q=${encodeURIComponent(q)}`,
+    }),
+    getOnlineLyricsText: builder.query<{ text: string | null }, string>({
+      query: (url) => `/search/lyrics/text?url=${encodeURIComponent(url)}`,
     }),
   }),
 });
@@ -186,6 +189,7 @@ export const {
   useGetSettingQuery,
   useSaveSettingMutation,
   useLazySearchOnlineLyricsQuery,
+  useLazyGetOnlineLyricsTextQuery,
   useGetThemesQuery,
   useCreateThemeMutation,
   useUpdateThemeMutation,

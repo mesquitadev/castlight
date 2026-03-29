@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCreateSongMutation, useLazySearchOnlineLyricsQuery, useGetThemesQuery } from "../store/api";
+import { useCreateSongMutation, useLazySearchOnlineLyricsQuery, useLazyGetOnlineLyricsTextQuery, useGetThemesQuery } from "../store/api";
 import { SectionType, SIDECAR_PORT } from "@castlight/shared";
 
 interface Props {
@@ -41,14 +41,25 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
   // Online search
   const [searchQuery, setSearchQuery] = useState("");
   const [triggerSearch, { data: searchResults = [], isFetching: searching }] = useLazySearchOnlineLyricsQuery();
+  const [triggerGetText, { isFetching: loadingText }] = useLazyGetOnlineLyricsTextQuery();
+  const [loadingLyricsFor, setLoadingLyricsFor] = useState<string | null>(null);
 
   const handleSearch = () => {
     if (searchQuery.trim()) triggerSearch(searchQuery);
   };
 
-  const handleSelectOnline = (result: { title: string; artist: string }) => {
+  const handleSelectOnline = async (result: { title: string; artist: string; lyricsUrl: string }) => {
     setTitle(result.title);
     setArtist(result.artist);
+    setLoadingLyricsFor(result.title);
+
+    const { data } = await triggerGetText(result.lyricsUrl);
+    if (data?.text) {
+      setLyricsText(data.text);
+      setSections(parseLyricsText(data.text));
+    }
+
+    setLoadingLyricsFor(null);
     setTab("create");
   };
 
@@ -127,26 +138,31 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
             </button>
           </div>
           <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-            A busca preenche titulo e artista. Voce cola a letra manualmente na aba "Criar manualmente".
+            Clique num resultado pra importar titulo, artista e a letra completa.
           </p>
+          {loadingLyricsFor && (
+            <div className="card p-4 flex items-center gap-3">
+              <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "var(--color-surface-500)", borderTopColor: "var(--color-accent)" }} />
+              <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>Buscando letra de "{loadingLyricsFor}"...</span>
+            </div>
+          )}
           {searchResults.map((result: any, i: number) => (
             <button
               key={i}
               onClick={() => handleSelectOnline(result)}
-              className="card w-full text-left p-3 flex items-center gap-3 transition-colors"
+              disabled={!!loadingLyricsFor}
+              className="card w-full text-left p-3 flex items-center gap-3 transition-colors disabled:opacity-50"
             >
-              {result.albumCover && (
-                <img src={result.albumCover} alt="" className="w-10 h-10 rounded object-cover" />
+              {result.thumbnail && (
+                <img src={result.thumbnail} alt="" className="w-10 h-10 rounded object-cover" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
                 <p className="text-sm truncate" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
               </div>
-              {result.duration > 0 && (
-                <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
-                  {Math.floor(result.duration / 60)}:{String(result.duration % 60).padStart(2, "0")}
-                </span>
-              )}
+              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "var(--color-surface-400)", color: "var(--color-text-muted)" }}>
+                Genius
+              </span>
             </button>
           ))}
         </div>

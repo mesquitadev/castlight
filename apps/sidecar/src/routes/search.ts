@@ -10,5 +10,12 @@ export function searchRoutes(service: LyricsSearchService): Hono {
     return c.json(await service.search(q));
   });
 
+  app.get("/lyrics/text", async (c) => {
+    const url = c.req.query("url") ?? "";
+    if (!url) return c.json({ error: "url required" }, 400);
+    const text = await service.getLyrics(url);
+    return c.json({ text });
+  });
+
   return app;
 }
