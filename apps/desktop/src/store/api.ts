@@ -1,12 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { Song, CreateSongInput, BibleVersion, BibleBook, BibleVerse } from "@castlight/shared";
+import type { Song, CreateSongInput, BibleVersion, BibleBook, BibleVerse, MediaFile, SlideSet, Notice, CreateNoticeInput } from "@castlight/shared";
 
 const SIDECAR_URL = "http://localhost:3100";
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${SIDECAR_URL}/api` }),
-  tagTypes: ["Songs", "Screens"],
+  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices"],
   endpoints: (builder) => ({
     getSongs: builder.query<Song[], string | void>({
       query: (search) => search ? `/lyrics?q=${search}` : "/lyrics",
@@ -48,6 +48,57 @@ export const api = createApi({
     searchBible: builder.query<BibleVerse[], { version: string; q: string }>({
       query: ({ version, q }) => `/bible/search?version=${version}&q=${q}`,
     }),
+    // Media
+    getMediaFiles: builder.query<MediaFile[], string | void>({
+      query: (type) => type ? `/media?type=${type}` : "/media",
+      providesTags: ["Media"],
+    }),
+    uploadMedia: builder.mutation<MediaFile, { file: File; type: string }>({
+      query: ({ file, type }) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("type", type);
+        return { url: "/media/upload", method: "POST", body: formData };
+      },
+      invalidatesTags: ["Media"],
+    }),
+    deleteMedia: builder.mutation<void, string>({
+      query: (id) => ({ url: `/media/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Media"],
+    }),
+    // Slides
+    getSlideSets: builder.query<SlideSet[], void>({
+      query: () => "/slides",
+      providesTags: ["Slides"],
+    }),
+    getSlideSet: builder.query<SlideSet, string>({
+      query: (id) => `/slides/${id}`,
+    }),
+    importSlides: builder.mutation<SlideSet, File>({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return { url: "/slides/import", method: "POST", body: formData };
+      },
+      invalidatesTags: ["Slides"],
+    }),
+    deleteSlideSet: builder.mutation<void, string>({
+      query: (id) => ({ url: `/slides/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Slides"],
+    }),
+    // Notices
+    getSavedNotices: builder.query<Notice[], void>({
+      query: () => "/notices",
+      providesTags: ["Notices"],
+    }),
+    createNotice: builder.mutation<Notice, CreateNoticeInput>({
+      query: (body) => ({ url: "/notices", method: "POST", body }),
+      invalidatesTags: ["Notices"],
+    }),
+    deleteNotice: builder.mutation<void, string>({
+      query: (id) => ({ url: `/notices/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Notices"],
+    }),
   }),
 });
 
@@ -61,4 +112,14 @@ export const {
   useGetBibleBooksQuery,
   useGetBibleVersesQuery,
   useSearchBibleQuery,
+  useGetMediaFilesQuery,
+  useUploadMediaMutation,
+  useDeleteMediaMutation,
+  useGetSlideSetsQuery,
+  useGetSlideSetQuery,
+  useImportSlidesMutation,
+  useDeleteSlideSetMutation,
+  useGetSavedNoticesQuery,
+  useCreateNoticeMutation,
+  useDeleteNoticeMutation,
 } = api;
