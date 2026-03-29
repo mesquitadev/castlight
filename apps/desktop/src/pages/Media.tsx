@@ -28,22 +28,17 @@ export function Media() {
   const TabContent = TAB_COMPONENTS[activeTab];
 
   return (
-    <div className="p-6 space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Mídia</h2>
-        <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie slides, imagens, videos e avisos</p>
+    <div className="p-6 space-y-5">
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <h2 className="page-title">Midia</h2>
+        <p className="page-subtitle">Gerencie slides, imagens, videos e avisos</p>
       </div>
-      <div className="flex gap-1" style={{ borderBottom: "1px solid var(--color-surface-300)" }}>
+      <div className="tab-bar">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="px-4 py-2 text-sm font-medium transition-colors"
-            style={
-              activeTab === tab.id
-                ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" }
-                : { color: "var(--color-text-muted)" }
-            }
+            className={`tab-item ${activeTab === tab.id ? "tab-item-active" : ""}`}
           >
             {tab.label}
           </button>

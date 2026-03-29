@@ -33,11 +33,11 @@ export function Lyrics() {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Letras</h2>
-          <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie e apresente letras de musicas</p>
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <h2 className="page-title">Letras</h2>
+          <p className="page-subtitle">Gerencie e apresente letras de musicas</p>
         </div>
         <button
           onClick={() => setView("create")}
@@ -55,8 +55,8 @@ export function Lyrics() {
       />
       {isLoading && <p style={{ color: "var(--color-text-muted)" }}>Carregando...</p>}
       {songs.length === 0 && !isLoading && (
-        <div className="card p-8 text-center space-y-3">
-          <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>Nenhuma musica encontrada</p>
+        <div className="card p-10 text-center space-y-3">
+          <p className="text-lg font-medium" style={{ color: "var(--color-text-secondary)" }}>Nenhuma musica encontrada</p>
           <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Clique em "+ Nova Musica" para criar ou buscar online.</p>
         </div>
       )}
@@ -64,19 +64,18 @@ export function Lyrics() {
         {songs.map((song) => (
           <li
             key={song.id}
-            className="card p-4 flex items-center justify-between transition-colors"
-            style={{ cursor: "pointer" }}
+            className="card card-interactive p-4 flex items-center justify-between"
           >
             <button
               onClick={() => { setSelectedSongId(song.id); setView("present"); }}
               className="flex-1 text-left"
             >
-              <p className="font-medium" style={{ color: "var(--color-text-primary)" }}>{song.title}</p>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{song.artist}{song.key ? ` • Tom: ${song.key}` : ""}</p>
+              <p className="font-semibold text-[0.9375rem]" style={{ color: "var(--color-text-primary)" }}>{song.title}</p>
+              <p className="text-sm mt-0.5" style={{ color: "var(--color-text-secondary)" }}>{song.artist}{song.key ? ` \u2022 Tom: ${song.key}` : ""}</p>
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); if (window.confirm(`Excluir "${song.title}"?`)) deleteSong(song.id); }}
-              className="btn btn-danger text-xs ml-3"
+              className="btn btn-danger btn-sm ml-3"
             >
               Excluir
             </button>

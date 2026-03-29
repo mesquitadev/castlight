@@ -34,19 +34,18 @@ function ScreenCard({ screen }: { screen: ScreenInfo }) {
   };
 
   return (
-    <li className="card p-4 space-y-3">
+    <li className="card p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-medium" style={{ color: "var(--color-text-primary)" }}>{screen.name || "Dispositivo sem nome"}</p>
-          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+          <p className="font-semibold text-[0.9375rem]" style={{ color: "var(--color-text-primary)" }}>{screen.name || "Dispositivo sem nome"}</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
             {screen.resolution.width}x{screen.resolution.height} — {screen.userAgent.slice(0, 40)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => identifyScreen(screen.id)}
-            className="text-xs transition-colors"
-            style={{ color: "var(--color-text-muted)" }}
+            className="btn btn-ghost btn-sm"
             aria-label="Identificar tela"
           >
             Identificar
@@ -64,8 +63,8 @@ function ScreenCard({ screen }: { screen: ScreenInfo }) {
           <button
             key={opt.value}
             onClick={() => handleAssignRole(opt.value)}
-            className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-              screen.role === opt.value ? "btn btn-primary" : "btn btn-secondary"
+            className={`btn btn-sm ${
+              screen.role === opt.value ? "btn-primary" : "btn-secondary"
             }`}
           >
             {opt.label}
@@ -81,11 +80,11 @@ export function Screens() {
   const dispatch = useDispatch();
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Telas Conectadas</h2>
-          <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie dispositivos na rede</p>
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <h2 className="page-title">Telas Conectadas</h2>
+          <p className="page-subtitle">Gerencie dispositivos na rede</p>
         </div>
         <button
           onClick={() => dispatch(toggleQRDialog())}
@@ -96,8 +95,8 @@ export function Screens() {
       </div>
 
       {screens.length === 0 ? (
-        <div className="card p-8 text-center space-y-3">
-          <p className="text-lg" style={{ color: "var(--color-text-secondary)" }}>Nenhuma tela conectada</p>
+        <div className="card p-10 text-center space-y-3">
+          <p className="text-lg font-medium" style={{ color: "var(--color-text-secondary)" }}>Nenhuma tela conectada</p>
           <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
             Dispositivos na rede podem acessar{" "}
             <span style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}>

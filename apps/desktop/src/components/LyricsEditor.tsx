@@ -9,9 +9,9 @@ interface Props {
 
 const SECTION_TYPES = [
   { value: SectionType.Verse, label: "Verso" },
-  { value: SectionType.Chorus, label: "Refrão" },
+  { value: SectionType.Chorus, label: "Refrao" },
   { value: SectionType.Bridge, label: "Ponte" },
-  { value: SectionType.PreChorus, label: "Pré-Refrão" },
+  { value: SectionType.PreChorus, label: "Pre-Refrao" },
   { value: SectionType.Intro, label: "Intro" },
   { value: SectionType.Outro, label: "Outro" },
 ];
@@ -19,13 +19,13 @@ const SECTION_TYPES = [
 const SECTION_MARKERS: Record<string, { type: string; label: string }> = {
   "verso": { type: SectionType.Verse, label: "Verso" },
   "verse": { type: SectionType.Verse, label: "Verso" },
-  "refrão": { type: SectionType.Chorus, label: "Refrão" },
-  "refrao": { type: SectionType.Chorus, label: "Refrão" },
-  "chorus": { type: SectionType.Chorus, label: "Refrão" },
+  "refrão": { type: SectionType.Chorus, label: "Refrao" },
+  "refrao": { type: SectionType.Chorus, label: "Refrao" },
+  "chorus": { type: SectionType.Chorus, label: "Refrao" },
   "ponte": { type: SectionType.Bridge, label: "Ponte" },
   "bridge": { type: SectionType.Bridge, label: "Ponte" },
-  "pré-refrão": { type: SectionType.PreChorus, label: "Pré-Refrão" },
-  "pre-chorus": { type: SectionType.PreChorus, label: "Pré-Refrão" },
+  "pré-refrão": { type: SectionType.PreChorus, label: "Pre-Refrao" },
+  "pre-chorus": { type: SectionType.PreChorus, label: "Pre-Refrao" },
   "intro": { type: SectionType.Intro, label: "Intro" },
   "outro": { type: SectionType.Outro, label: "Outro" },
 };
@@ -127,25 +127,23 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Nova Musica</h2>
-        <button onClick={onClose} className="text-sm" style={{ color: "var(--color-text-muted)" }}>Cancelar</button>
+        <h2 className="page-title">Nova Musica</h2>
+        <button onClick={onClose} className="btn btn-ghost">Cancelar</button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1" style={{ borderBottom: "1px solid var(--color-surface-300)" }}>
+      <div className="tab-bar">
         <button
           onClick={() => setTab("create")}
-          className="px-4 py-2 text-sm font-medium"
-          style={tab === "create" ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" } : { color: "var(--color-text-muted)" }}
+          className={`tab-item ${tab === "create" ? "tab-item-active" : ""}`}
         >
           Criar manualmente
         </button>
         <button
           onClick={() => setTab("search")}
-          className="px-4 py-2 text-sm font-medium"
-          style={tab === "search" ? { color: "var(--color-text-primary)", borderBottom: "2px solid var(--color-accent)" } : { color: "var(--color-text-muted)" }}
+          className={`tab-item ${tab === "search" ? "tab-item-active" : ""}`}
         >
           Buscar online
         </button>
@@ -162,7 +160,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="input-field flex-1"
             />
-            <button onClick={handleSearch} disabled={searching} className="btn btn-primary disabled:opacity-50">
+            <button onClick={handleSearch} disabled={searching} className="btn btn-primary">
               {searching ? "Buscando..." : "Buscar"}
             </button>
           </div>
@@ -180,16 +178,16 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
               key={i}
               onClick={() => handleSelectOnline(result)}
               disabled={!!loadingLyricsFor}
-              className="card w-full text-left p-3 flex items-center gap-3 transition-colors disabled:opacity-50"
+              className="card card-interactive w-full text-left p-4 flex items-center gap-3"
             >
               {result.thumbnail && (
                 <img src={result.thumbnail} alt="" className="w-10 h-10 rounded object-cover" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
-                <p className="text-sm truncate" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
+                <p className="font-semibold truncate" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
+                <p className="text-sm truncate mt-0.5" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
               </div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "var(--color-surface-400)", color: "var(--color-text-muted)" }}>
+              <span className="badge badge-accent">
                 Genius
               </span>
             </button>
@@ -207,15 +205,15 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
           </div>
 
           {/* Theme selector */}
-          <div className="card p-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase font-semibold" style={{ color: "var(--color-text-secondary)" }}>Tema visual</p>
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="section-label">Tema visual</p>
               {selectedThemeId && (
-                <button onClick={() => setSelectedThemeId("")} className="text-xs" style={{ color: "var(--color-text-muted)" }}>Limpar</button>
+                <button onClick={() => setSelectedThemeId("")} className="btn btn-ghost btn-sm">Limpar</button>
               )}
             </div>
             {themes.length === 0 ? (
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Nenhum tema criado. Va em Config → Temas para criar.</p>
+              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Nenhum tema criado. Va em Config \u2192 Temas para criar.</p>
             ) : (
               <div className="grid grid-cols-4 gap-2">
                 {themes.map((theme: any) => (
@@ -246,7 +244,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
 
           {/* Quick paste area */}
           <div>
-            <p className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Cole a letra inteira (separe secoes com linha em branco):</p>
+            <p className="section-label mb-2">Cole a letra inteira (separe secoes com linha em branco):</p>
             <textarea
               value={lyricsText}
               onChange={(e) => handleTextChange(e.target.value)}
@@ -259,18 +257,18 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
 
           {/* Sections editor */}
           {sections.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs uppercase font-semibold" style={{ color: "var(--color-text-secondary)" }}>Secoes ({sections.length})</p>
-                <button onClick={addSection} className="text-xs hover:underline" style={{ color: "var(--color-accent)" }}>+ Adicionar secao</button>
+                <p className="section-label">Secoes ({sections.length})</p>
+                <button onClick={addSection} className="btn btn-ghost btn-sm" style={{ color: "var(--color-accent)" }}>+ Adicionar secao</button>
               </div>
               {sections.map((section, i) => (
-                <div key={i} className="card p-3 space-y-2">
+                <div key={i} className="card p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <select
                       value={section.type}
                       onChange={(e) => updateSection(i, "type", e.target.value)}
-                      className="input-field px-2 py-1 text-xs"
+                      className="input-field px-2 py-1.5 text-xs"
                     >
                       {SECTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
@@ -278,9 +276,9 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
                       type="text"
                       value={section.label}
                       onChange={(e) => updateSection(i, "label", e.target.value)}
-                      className="input-field flex-1 px-2 py-1 text-xs"
+                      className="input-field flex-1 px-2 py-1.5 text-xs"
                     />
-                    <button onClick={() => removeSection(i)} className="text-xs" style={{ color: "var(--color-danger)" }}>Remover</button>
+                    <button onClick={() => removeSection(i)} className="btn btn-danger btn-sm">Remover</button>
                   </div>
                   <textarea
                     value={section.text}
@@ -298,7 +296,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
           <button
             onClick={handleSave}
             disabled={creating || !title.trim() || sections.length === 0}
-            className="btn btn-primary disabled:opacity-50"
+            className="btn btn-primary"
           >
             {creating ? "Salvando..." : "Salvar Musica"}
           </button>

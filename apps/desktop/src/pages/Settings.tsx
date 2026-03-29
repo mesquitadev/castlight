@@ -7,14 +7,14 @@ import { ThemesTab } from "../components/settings/ThemesTab";
 
 const SECTIONS = [
   {
-    label: "Aparência",
+    label: "Aparencia",
     tabs: [
       { id: "themes", label: "Temas" },
-      { id: "projection", label: "Projeção" },
+      { id: "projection", label: "Projecao" },
     ],
   },
   {
-    label: "Integração",
+    label: "Integracao",
     tabs: [
       { id: "bibles", label: "Biblias" },
       { id: "obs", label: "OBS" },
@@ -40,10 +40,10 @@ export function Settings() {
   return (
     <div className="flex h-full">
       {/* Left sidebar with grouped tabs */}
-      <div className="w-48 flex-shrink-0 overflow-y-auto py-6 px-3 space-y-5" style={{ borderRight: "1px solid var(--color-surface-300)" }}>
+      <div className="w-48 flex-shrink-0 overflow-y-auto py-6 px-3 space-y-6" style={{ borderRight: "1px solid var(--color-surface-300)" }}>
         {SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--color-surface-600)" }}>
+            <p className="section-label px-3 pb-2">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -53,7 +53,7 @@ export function Settings() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all"
+                    className="w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium transition-all"
                     style={{
                       color: isActive ? "var(--color-accent)" : "var(--color-surface-800)",
                       background: isActive ? "var(--color-accent-glow)" : "transparent",
