@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "@castlight/shared": "workspace:*",
-    "hono": "^4",
-    "socket.io": "^4",
+    "@homebridge/ciao": "^1",
     "better-sqlite3": "^11",
-    "@homebridge/ciao": "^1"
+    "hono": "^4",
+    "obs-websocket-js": "^5.0.8",
+    "socket.io": "^4"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7",
