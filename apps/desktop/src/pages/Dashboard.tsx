@@ -2,7 +2,6 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../store";
 import { ContentType, SIDECAR_PORT, ScreenRole } from "@castlight/shared";
 import { clearPresentation } from "../store/slices/presentation";
-import { WallpaperPicker } from "../components/WallpaperPicker";
 
 const contentLabels: Record<string, string> = {
   [ContentType.Lyrics]: "Letra",
@@ -123,8 +122,6 @@ export function Dashboard() {
             )}
           </div>
 
-          {/* Wallpaper */}
-          <WallpaperPicker />
         </div>
 
         {/* Right column — Stats + Connected screens */}
