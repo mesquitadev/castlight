@@ -1,0 +1,31 @@
+{
+  "version": { "id": "acf", "name": "Almeida Corrigida Fiel", "language": "pt" },
+  "books": [
+    {
+      "name": "Genesis",
+      "abbr": "Gn",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            { "verse": 1, "text": "No principio criou Deus os ceus e a terra." },
+            { "verse": 2, "text": "E a terra era sem forma e vazia; e havia trevas sobre a face do abismo; e o Espirito de Deus se movia sobre a face das aguas." },
+            { "verse": 3, "text": "E disse Deus: Haja luz. E houve luz." }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Joao",
+      "abbr": "Jo",
+      "chapters": [
+        {
+          "chapter": 3,
+          "verses": [
+            { "verse": 16, "text": "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigenito, para que todo aquele que nele cre nao pereca, mas tenha a vida eterna." }
+          ]
+        }
+      ]
+    }
+  ]
+}
