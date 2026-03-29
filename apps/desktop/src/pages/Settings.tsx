@@ -3,8 +3,10 @@ import { OBSTab } from "../components/settings/OBSTab";
 import { StreamTab } from "../components/settings/StreamTab";
 import { BiblesTab } from "../components/settings/BiblesTab";
 import { ProjectionTab } from "../components/settings/ProjectionTab";
+import { ThemesTab } from "../components/settings/ThemesTab";
 
 const TABS = [
+  { id: "themes", label: "Temas" },
   { id: "projection", label: "Projecao" },
   { id: "bibles", label: "Biblias" },
   { id: "obs", label: "OBS" },
@@ -13,6 +15,7 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 const TAB_COMPONENTS: Record<TabId, React.FC> = {
+  themes: ThemesTab,
   projection: ProjectionTab,
   bibles: BiblesTab,
   obs: OBSTab,
@@ -20,7 +23,7 @@ const TAB_COMPONENTS: Record<TabId, React.FC> = {
 };
 
 export function Settings() {
-  const [activeTab, setActiveTab] = useState<TabId>("projection");
+  const [activeTab, setActiveTab] = useState<TabId>("themes");
   const TabContent = TAB_COMPONENTS[activeTab];
   return (
     <div className="p-6 space-y-4">

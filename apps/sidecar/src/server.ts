@@ -25,6 +25,10 @@ import { noticesRoutes } from "./routes/notices";
 import { obsRoutes } from "./routes/obs";
 import { settingsRoutes } from "./routes/settings";
 import { SIDECAR_WS_PATH } from "@castlight/shared";
+import { LyricsSearchService } from "./services/lyrics-search";
+import { ThemesService } from "./services/themes";
+import { searchRoutes } from "./routes/search";
+import { themesRoutes } from "./routes/themes";
 import { getLocalIP } from "./mdns/discovery";
 
 export interface AppContext {
@@ -64,8 +68,13 @@ export function createApp(ctx: AppContext) {
   app.route("/api/media", mediaRoutes(mediaService));
   app.route("/api/slides", slidesRoutes(slidesService));
   app.route("/api/notices", noticesRoutes(noticesService));
+  const lyricsSearchService = new LyricsSearchService();
+  const themesService = new ThemesService(ctx.db);
+
   app.route("/api/obs", obsRoutes(obsService));
   app.route("/api/settings", settingsRoutes(settingsService));
+  app.route("/api/search", searchRoutes(lyricsSearchService));
+  app.route("/api/themes", themesRoutes(themesService));
 
   app.get("/api/health", (c) => c.json({ status: "ok", ip: getLocalIP() }));
 

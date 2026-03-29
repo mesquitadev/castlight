@@ -6,7 +6,7 @@ const SIDECAR_URL = "http://localhost:3100";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${SIDECAR_URL}/api` }),
-  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices", "OBS", "Bibles"],
+  tagTypes: ["Songs", "Screens", "Media", "Slides", "Notices", "OBS", "Bibles", "Themes"],
   endpoints: (builder) => ({
     getSongs: builder.query<Song[], string | void>({
       query: (search) => search ? `/lyrics?q=${search}` : "/lyrics",
@@ -122,6 +122,37 @@ export const api = createApi({
     stopRecording: builder.mutation<void, void>({ query: () => ({ url: "/obs/record/stop", method: "POST" }) }),
     getSetting: builder.query<any, string>({ query: (key) => `/settings/${key}` }),
     saveSetting: builder.mutation<void, { key: string; value: any }>({ query: ({ key, value }) => ({ url: `/settings/${key}`, method: "PUT", body: value }) }),
+    // Themes
+    getThemes: builder.query<any[], void>({
+      query: () => "/themes",
+      providesTags: ["Themes"],
+    }),
+    getTheme: builder.query<any, string>({
+      query: (id) => `/themes/${id}`,
+    }),
+    createTheme: builder.mutation<any, any>({
+      query: (body) => ({ url: "/themes", method: "POST", body }),
+      invalidatesTags: ["Themes"],
+    }),
+    updateTheme: builder.mutation<any, { id: string; body: any }>({
+      query: ({ id, body }) => ({ url: `/themes/${id}`, method: "PATCH", body }),
+      invalidatesTags: ["Themes"],
+    }),
+    setDefaultTheme: builder.mutation<void, string>({
+      query: (id) => ({ url: `/themes/${id}/default`, method: "POST" }),
+      invalidatesTags: ["Themes"],
+    }),
+    deleteTheme: builder.mutation<void, string>({
+      query: (id) => ({ url: `/themes/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Themes"],
+    }),
+    // Online lyrics search
+    searchOnlineLyrics: builder.query<Array<{ title: string; artist: string; text: string; source: string }>, string>({
+      query: (q) => `/search/lyrics?q=${encodeURIComponent(q)}`,
+    }),
+    getOnlineLyricsText: builder.query<{ text: string | null }, { artist: string; title: string }>({
+      query: ({ artist, title }) => `/search/lyrics/text?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`,
+    }),
   }),
 });
 
@@ -157,4 +188,11 @@ export const {
   useStopRecordingMutation,
   useGetSettingQuery,
   useSaveSettingMutation,
+  useLazySearchOnlineLyricsQuery,
+  useLazyGetOnlineLyricsTextQuery,
+  useGetThemesQuery,
+  useCreateThemeMutation,
+  useUpdateThemeMutation,
+  useSetDefaultThemeMutation,
+  useDeleteThemeMutation,
 } = api;
