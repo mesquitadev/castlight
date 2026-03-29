@@ -9,9 +9,9 @@ interface Props {
 
 const SECTION_TYPES = [
   { value: SectionType.Verse, label: "Verso" },
-  { value: SectionType.Chorus, label: "Refrao" },
+  { value: SectionType.Chorus, label: "Refrão" },
   { value: SectionType.Bridge, label: "Ponte" },
-  { value: SectionType.PreChorus, label: "Pre-Refrao" },
+  { value: SectionType.PreChorus, label: "Pré-Refrão" },
   { value: SectionType.Intro, label: "Intro" },
   { value: SectionType.Outro, label: "Outro" },
 ];
@@ -20,7 +20,7 @@ function parseLyricsText(text: string): Array<{ type: string; label: string; tex
   const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
   return blocks.map((block, i) => ({
     type: i === 0 ? SectionType.Verse : (i % 2 === 1 ? SectionType.Chorus : SectionType.Verse),
-    label: i === 0 ? "Verso 1" : (i % 2 === 1 ? `Refrao` : `Verso ${Math.ceil((i + 1) / 2)}`),
+    label: i === 0 ? "Verso 1" : (i % 2 === 1 ? `Refrão` : `Verso ${Math.ceil((i + 1) / 2)}`),
     text: block.trim(),
     order: i,
   }));

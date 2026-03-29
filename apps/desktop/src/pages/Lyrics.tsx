@@ -26,7 +26,7 @@ export function Lyrics() {
 
   if (view === "present" && selectedSong) {
     return (
-      <div className="p-6">
+      <div className="h-full">
         <LyricsPresenter song={selectedSong} onClose={() => { setView("list"); setSelectedSongId(null); }} />
       </div>
     );
@@ -75,7 +75,7 @@ export function Lyrics() {
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{song.artist}{song.key ? ` • Tom: ${song.key}` : ""}</p>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); deleteSong(song.id); }}
+              onClick={(e) => { e.stopPropagation(); if (window.confirm(`Excluir "${song.title}"?`)) deleteSong(song.id); }}
               className="btn btn-danger text-xs ml-3"
             >
               Excluir

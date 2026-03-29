@@ -7,14 +7,14 @@ import { ThemesTab } from "../components/settings/ThemesTab";
 
 const SECTIONS = [
   {
-    label: "Aparencia",
+    label: "Aparência",
     tabs: [
       { id: "themes", label: "Temas" },
-      { id: "projection", label: "Projecao" },
+      { id: "projection", label: "Projeção" },
     ],
   },
   {
-    label: "Integracao",
+    label: "Integração",
     tabs: [
       { id: "bibles", label: "Biblias" },
       { id: "obs", label: "OBS" },

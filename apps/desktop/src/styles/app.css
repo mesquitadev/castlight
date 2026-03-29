@@ -24,6 +24,10 @@
   --color-danger: #f43f5e;
   --color-success: #34d399;
   --color-warning: #fbbf24;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c0c0d0;
+  --color-text-muted: #4a4a60;
 }
 
 html, body, #root {

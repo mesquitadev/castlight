@@ -5,7 +5,7 @@ import { WallpaperPicker } from "../components/WallpaperPicker";
 
 const contentLabels: Record<string, string> = {
   [ContentType.Lyrics]: "Letra",
-  [ContentType.Bible]: "Versiculo",
+  [ContentType.Bible]: "Versículo",
   [ContentType.Slide]: "Slide",
   [ContentType.Image]: "Imagem",
   [ContentType.Video]: "Video",
@@ -31,7 +31,7 @@ export function Dashboard() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>Dashboard</h2>
-        <p className="text-sm mt-1" style={{ color: "var(--color-surface-700)" }}>Visao geral do culto</p>
+        <p className="text-sm mt-1" style={{ color: "var(--color-surface-700)" }}>Visão geral do culto</p>
       </div>
 
       {/* Stats */}

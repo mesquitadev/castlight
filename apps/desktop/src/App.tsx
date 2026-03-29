@@ -24,7 +24,7 @@ export function App() {
   const Page = PAGES[activePanel as keyof typeof PAGES] ?? Dashboard;
 
   return (
-    <div className="flex h-screen" style={{ background: "var(--color-surface-50)", fontFamily: "var(--font-display)" }}>
+    <div className="flex h-screen">
       <Sidebar />
       <main className="flex-1 overflow-hidden relative">
         <div className="absolute inset-0 overflow-y-auto">

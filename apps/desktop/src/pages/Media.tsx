@@ -30,7 +30,7 @@ export function Media() {
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Midia</h2>
+        <h2 className="text-xl font-semibold" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Mídia</h2>
         <p className="text-sm mt-0.5" style={{ color: "var(--color-text-muted)" }}>Gerencie slides, imagens, videos e avisos</p>
       </div>
       <div className="flex gap-1" style={{ borderBottom: "1px solid var(--color-surface-300)" }}>

@@ -87,7 +87,7 @@ export function LyricsPresenter({ song, onClose }: Props) {
   }, [activeSlide, total, sendSlide, handleClear, editing]);
 
   return (
-    <div style={{ height: "calc(100vh - 2rem)", display: "flex", flexDirection: "column" }}>
+    <div className="h-full" style={{ display: "flex", flexDirection: "column" }}>
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: "var(--color-surface-100)", borderBottom: "1px solid var(--color-surface-300)" }}>
         {/* Left: back + title */}
@@ -103,7 +103,7 @@ export function LyricsPresenter({ song, onClose }: Props) {
 
         {/* Center: transport */}
         <div className="flex items-center gap-1">
-          <button onClick={() => activeSlide !== null && activeSlide > 0 && sendSlide(activeSlide - 1)} disabled={!activeSlide} className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-20" style={{ color: "var(--color-surface-800)" }}>
+          <button onClick={() => activeSlide !== null && activeSlide > 0 && sendSlide(activeSlide - 1)} disabled={activeSlide === null || activeSlide === 0} className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-20" style={{ color: "var(--color-surface-800)" }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8z"/><rect x="5" y="5" width="2" height="14"/></svg>
           </button>
           {activeSlide === null ? (
