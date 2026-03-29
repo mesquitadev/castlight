@@ -1,0 +1,14 @@
+{
+  "name": "castlight",
+  "private": true,
+  "scripts": {
+    "dev:sidecar": "turbo run dev --filter=@castlight/sidecar",
+    "dev:desktop": "turbo run dev --filter=@castlight/desktop",
+    "test": "turbo run test",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2",
+    "typescript": "^5.7"
+  }
+}

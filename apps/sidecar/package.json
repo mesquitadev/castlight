@@ -1,0 +1,22 @@
+{
+  "name": "@castlight/sidecar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@castlight/shared": "workspace:*",
+    "hono": "^4",
+    "socket.io": "^4",
+    "better-sqlite3": "^11",
+    "@homebridge/ciao": "^1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7",
+    "typescript": "^5.7"
+  }
+}
