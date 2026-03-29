@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useCreateSongMutation, useLazySearchOnlineLyricsQuery, useLazyGetOnlineLyricsTextQuery } from "../store/api";
-import { SectionType } from "@castlight/shared";
+import { useCreateSongMutation, useLazySearchOnlineLyricsQuery, useGetThemesQuery } from "../store/api";
+import { SectionType, SIDECAR_PORT } from "@castlight/shared";
 
 interface Props {
   onClose: () => void;
@@ -17,7 +17,6 @@ const SECTION_TYPES = [
 ];
 
 function parseLyricsText(text: string): Array<{ type: string; label: string; text: string; order: number }> {
-  // Split by double newlines into sections
   const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
   return blocks.map((block, i) => ({
     type: i === 0 ? SectionType.Verse : (i % 2 === 1 ? SectionType.Chorus : SectionType.Verse),
@@ -32,30 +31,25 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [key, setKey] = useState("");
+  const [selectedThemeId, setSelectedThemeId] = useState<string>("");
   const [lyricsText, setLyricsText] = useState("");
   const [sections, setSections] = useState<Array<{ type: string; label: string; text: string; order: number }>>([]);
 
   const [createSong, { isLoading: creating }] = useCreateSongMutation();
+  const { data: themes = [] } = useGetThemesQuery();
 
   // Online search
   const [searchQuery, setSearchQuery] = useState("");
   const [triggerSearch, { data: searchResults = [], isFetching: searching }] = useLazySearchOnlineLyricsQuery();
-  const [triggerGetText, { isFetching: loadingText }] = useLazyGetOnlineLyricsTextQuery();
 
   const handleSearch = () => {
     if (searchQuery.trim()) triggerSearch(searchQuery);
   };
 
-  const handleSelectOnline = async (result: { title: string; artist: string }) => {
+  const handleSelectOnline = (result: { title: string; artist: string }) => {
     setTitle(result.title);
     setArtist(result.artist);
     setTab("create");
-
-    const { data } = await triggerGetText({ artist: result.artist, title: result.title });
-    if (data?.text) {
-      setLyricsText(data.text);
-      setSections(parseLyricsText(data.text));
-    }
   };
 
   const handleTextChange = (text: string) => {
@@ -86,6 +80,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
       title: title.trim(),
       artist: artist.trim(),
       key: key.trim() || undefined,
+      tags: selectedThemeId ? [`theme:${selectedThemeId}`] : undefined,
       sections: sections.map((s, i) => ({ type: s.type, label: s.label, text: s.text, order: i })),
     }).unwrap();
     onCreated(result.id);
@@ -131,16 +126,27 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
               {searching ? "Buscando..." : "Buscar"}
             </button>
           </div>
-          {searchResults.map((result, i) => (
+          <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            A busca preenche titulo e artista. Voce cola a letra manualmente na aba "Criar manualmente".
+          </p>
+          {searchResults.map((result: any, i: number) => (
             <button
               key={i}
               onClick={() => handleSelectOnline(result)}
-              disabled={loadingText}
-              className="card w-full text-left p-3 transition-colors"
-              style={{ display: "block" }}
+              className="card w-full text-left p-3 flex items-center gap-3 transition-colors"
             >
-              <p className="font-medium" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
+              {result.albumCover && (
+                <img src={result.albumCover} alt="" className="w-10 h-10 rounded object-cover" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate" style={{ color: "var(--color-text-primary)" }}>{result.title}</p>
+                <p className="text-sm truncate" style={{ color: "var(--color-text-secondary)" }}>{result.artist}</p>
+              </div>
+              {result.duration > 0 && (
+                <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
+                  {Math.floor(result.duration / 60)}:{String(result.duration % 60).padStart(2, "0")}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -150,9 +156,47 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
         <div className="space-y-4">
           {/* Song info */}
           <div className="grid grid-cols-3 gap-3">
-            <input type="text" placeholder="Titulo *" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field col-span-1" />
-            <input type="text" placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} className="input-field col-span-1" />
-            <input type="text" placeholder="Tom (ex: G, Am)" value={key} onChange={(e) => setKey(e.target.value)} className="input-field col-span-1" />
+            <input type="text" placeholder="Titulo *" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" />
+            <input type="text" placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} className="input-field" />
+            <input type="text" placeholder="Tom (ex: G, Am)" value={key} onChange={(e) => setKey(e.target.value)} className="input-field" />
+          </div>
+
+          {/* Theme selector */}
+          <div className="card p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase font-semibold" style={{ color: "var(--color-text-secondary)" }}>Tema visual</p>
+              {selectedThemeId && (
+                <button onClick={() => setSelectedThemeId("")} className="text-xs" style={{ color: "var(--color-text-muted)" }}>Limpar</button>
+              )}
+            </div>
+            {themes.length === 0 ? (
+              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Nenhum tema criado. Va em Config → Temas para criar.</p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {themes.map((theme: any) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => setSelectedThemeId(theme.id)}
+                    className="rounded-lg overflow-hidden transition-all"
+                    style={selectedThemeId === theme.id ? { outline: "2px solid var(--color-accent)", outlineOffset: "2px" } : {}}
+                  >
+                    <div
+                      className="aspect-video flex items-center justify-center"
+                      style={{
+                        backgroundColor: theme.backgroundType === "color" ? theme.backgroundValue : "#000",
+                        backgroundImage: theme.backgroundType === "image" ? `url(http://localhost:${SIDECAR_PORT}${theme.backgroundValue})` : undefined,
+                        backgroundSize: theme.backgroundFit === "stretch" ? "100% 100%" : theme.backgroundFit,
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      <p style={{ color: theme.fontColor, fontFamily: theme.fontFamily, fontWeight: theme.fontWeight, textShadow: theme.textShadow, fontSize: "0.6rem" }}>
+                        {theme.name}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick paste area */}
@@ -161,7 +205,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
             <textarea
               value={lyricsText}
               onChange={(e) => handleTextChange(e.target.value)}
-              rows={6}
+              rows={8}
               className="input-field w-full resize-none"
               style={{ fontFamily: "var(--font-mono)" }}
               placeholder={"Verso 1 aqui\nSegunda linha\n\nRefrao aqui\nSegunda linha do refrao\n\nVerso 2 aqui"}
@@ -172,7 +216,7 @@ export function LyricsEditor({ onClose, onCreated }: Props) {
           {sections.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs uppercase" style={{ color: "var(--color-text-secondary)" }}>Secoes ({sections.length})</p>
+                <p className="text-xs uppercase font-semibold" style={{ color: "var(--color-text-secondary)" }}>Secoes ({sections.length})</p>
                 <button onClick={addSection} className="text-xs hover:underline" style={{ color: "var(--color-accent)" }}>+ Adicionar secao</button>
               </div>
               {sections.map((section, i) => (

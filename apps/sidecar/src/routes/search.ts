@@ -10,13 +10,5 @@ export function searchRoutes(service: LyricsSearchService): Hono {
     return c.json(await service.search(q));
   });
 
-  app.get("/lyrics/text", async (c) => {
-    const artist = c.req.query("artist") ?? "";
-    const title = c.req.query("title") ?? "";
-    if (!artist || !title) return c.json({ error: "artist and title required" }, 400);
-    const text = await service.getLyrics(artist, title);
-    return c.json({ text });
-  });
-
   return app;
 }

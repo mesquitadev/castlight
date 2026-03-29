@@ -1,51 +1,44 @@
-// Online lyrics search via Vagalume API (free, no key needed for search)
-// Falls back to simple scraping if API fails
+// Online music search via Deezer API (free, no key needed)
 
 export interface OnlineSearchResult {
   title: string;
   artist: string;
-  text: string;
+  albumCover: string;
+  duration: number;
   source: string;
 }
 
 export class LyricsSearchService {
   async search(query: string): Promise<OnlineSearchResult[]> {
     try {
-      return await this.searchVagalume(query);
-    } catch {
-      return [];
-    }
-  }
-
-  private async searchVagalume(query: string): Promise<OnlineSearchResult[]> {
-    const url = `https://api.vagalume.com.br/search.php?musict=${encodeURIComponent(query)}`;
-    const response = await fetch(url);
-    if (!response.ok) return [];
-
-    const data = await response.json();
-    if (!data.response?.docs) return [];
-
-    return data.response.docs.slice(0, 10).map((doc: any) => ({
-      title: doc.title ?? "",
-      artist: doc.band ?? "",
-      text: "",
-      source: "vagalume",
-    }));
-  }
-
-  async getLyrics(artist: string, title: string): Promise<string | null> {
-    try {
-      const url = `https://api.vagalume.com.br/search.php?art=${encodeURIComponent(artist)}&mus=${encodeURIComponent(title)}`;
+      const url = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=15`;
       const response = await fetch(url);
-      if (!response.ok) return null;
+      if (!response.ok) return [];
 
       const data = await response.json();
-      if (data.type === "exact" || data.type === "aprox") {
-        return data.mus?.[0]?.text ?? null;
+      if (!data.data) return [];
+
+      // Deduplicate by title+artist
+      const seen = new Set<string>();
+      const results: OnlineSearchResult[] = [];
+
+      for (const track of data.data) {
+        const key = `${track.title_short?.toLowerCase()}|${track.artist?.name?.toLowerCase()}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        results.push({
+          title: track.title_short ?? track.title ?? "",
+          artist: track.artist?.name ?? "",
+          albumCover: track.album?.cover_small ?? "",
+          duration: track.duration ?? 0,
+          source: "deezer",
+        });
       }
-      return null;
+
+      return results;
     } catch {
-      return null;
+      return [];
     }
   }
 }
