@@ -16,8 +16,9 @@ db.exec("PRAGMA foreign_keys = ON");
 runMigrations(db);
 
 const biblesDir = join(import.meta.dir, "../../../assets/bibles");
+const mediaDir = join(dataDir, "media");
 
-const { app, httpServer } = createApp({ db, biblesDir });
+const { app, httpServer } = createApp({ db, biblesDir, mediaDir });
 
 // Mount Hono on the Node http server (same port for HTTP + WS)
 httpServer.on("request", async (req, res) => {
