@@ -4,7 +4,14 @@ import type { RootState } from "../store";
 import { useGetMediaFilesQuery, useUploadMediaMutation, useGetSettingQuery, useSaveSettingMutation } from "../store/api";
 import { setBackground } from "../store/slices/presentation";
 import { SIDECAR_PORT, ScreenRole } from "@castlight/shared";
-import type { BackgroundConfig } from "@castlight/shared";
+import type { BackgroundConfig, BackgroundFit } from "@castlight/shared";
+
+const FIT_OPTIONS: { value: BackgroundFit; label: string; desc: string }[] = [
+  { value: "cover", label: "Preencher", desc: "Preenche toda a tela, pode cortar" },
+  { value: "contain", label: "Ajustar", desc: "Mostra toda a imagem, pode ter barras" },
+  { value: "stretch", label: "Esticar", desc: "Estica pra caber, pode distorcer" },
+  { value: "center", label: "Centralizar", desc: "Tamanho original, centralizado" },
+];
 
 function broadcastBackground(config: BackgroundConfig) {
   fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
@@ -27,6 +34,7 @@ export function WallpaperPicker() {
   const { data: savedWallpaper } = useGetSettingQuery("default_wallpaper");
   const [saveSetting] = useSaveSettingMutation();
   const [applied, setApplied] = useState(false);
+  const [fit, setFit] = useState<BackgroundFit>("cover");
 
   // On load, apply saved wallpaper
   useEffect(() => {
@@ -34,6 +42,7 @@ export function WallpaperPicker() {
       const config = savedWallpaper as BackgroundConfig;
       dispatch(setBackground(config));
       broadcastBackground(config);
+      if (config.fit) setFit(config.fit);
       setApplied(true);
     }
   }, [savedWallpaper, applied, dispatch]);
@@ -46,15 +55,33 @@ export function WallpaperPicker() {
   };
 
   const applyWallpaper = (config: BackgroundConfig) => {
-    dispatch(setBackground(config));
-    broadcastBackground(config);
-    saveSetting({ key: "default_wallpaper", value: config });
+    const withFit = { ...config, fit };
+    dispatch(setBackground(withFit));
+    broadcastBackground(withFit);
+    saveSetting({ key: "default_wallpaper", value: withFit });
+  };
+
+  const changeFit = (newFit: BackgroundFit) => {
+    setFit(newFit);
+    if (currentBg && currentBg.type === "image") {
+      const updated = { ...currentBg, fit: newFit };
+      dispatch(setBackground(updated));
+      broadcastBackground(updated);
+      saveSetting({ key: "default_wallpaper", value: updated });
+    }
   };
 
   const clearWallpaper = () => {
     dispatch(setBackground(null));
     broadcastBackground({ type: "color", value: "#000000" });
     saveSetting({ key: "default_wallpaper", value: { type: "color", value: "#000000" } });
+  };
+
+  const fitCssMap: Record<BackgroundFit, string> = {
+    cover: "object-cover",
+    contain: "object-contain",
+    stretch: "object-fill",
+    center: "object-none",
   };
 
   return (
@@ -82,13 +109,31 @@ export function WallpaperPicker() {
           <img
             src={`http://localhost:${SIDECAR_PORT}${currentBg.value}`}
             alt="Papel de parede"
-            className="w-full h-full object-cover"
+            className={`w-full h-full ${fitCssMap[currentBg.fit ?? "cover"]}`}
           />
         ) : currentBg?.type === "color" && currentBg.value !== "#000000" ? (
           <div className="w-full h-full" style={{ backgroundColor: currentBg.value }} />
         ) : (
           <p className="text-zinc-600 text-sm">Nenhum papel de parede definido</p>
         )}
+      </div>
+
+      {/* Fit options */}
+      <div className="flex gap-2">
+        {FIT_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => changeFit(opt.value)}
+            title={opt.desc}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+              fit === opt.value
+                ? "bg-blue-600 text-white"
+                : "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* Available backgrounds */}

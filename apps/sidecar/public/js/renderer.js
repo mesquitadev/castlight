@@ -1,12 +1,19 @@
-const SIDECAR_URL = window.location.origin;
+var SIDECAR_URL = window.location.origin;
+
+var FIT_CSS = {
+  cover: "cover",
+  contain: "contain",
+  stretch: "100% 100%",
+  center: "auto",
+};
 
 function createRenderer(contentLayer, backgroundLayer) {
-  let currentVideo = null;
+  var currentVideo = null;
 
   function fadeContent(callback) {
     contentLayer.classList.add("fade-out");
     contentLayer.classList.remove("fade-in");
-    setTimeout(() => {
+    setTimeout(function() {
       callback();
       contentLayer.classList.remove("fade-out");
       contentLayer.classList.add("fade-in");
@@ -14,48 +21,48 @@ function createRenderer(contentLayer, backgroundLayer) {
   }
 
   function escapeHtml(text) {
-    const div = document.createElement("div");
+    var div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
 
   function renderLyrics(data) {
-    fadeContent(() => {
+    fadeContent(function() {
       contentLayer.innerHTML = '<div class="content-text">' + escapeHtml(data.section.text) + '</div>';
     });
   }
 
   function renderBible(data) {
-    fadeContent(() => {
-      const verseText = data.verses.map((v) => '<sup>' + v.verse + '</sup> ' + escapeHtml(v.text)).join(" ");
-      const ref = data.reference.book + ' ' + data.reference.chapter + ':' + data.reference.verseStart + (data.reference.verseEnd ? '-' + data.reference.verseEnd : '');
+    fadeContent(function() {
+      var verseText = data.verses.map(function(v) { return '<sup>' + v.verse + '</sup> ' + escapeHtml(v.text); }).join(" ");
+      var ref = data.reference.book + ' ' + data.reference.chapter + ':' + data.reference.verseStart + (data.reference.verseEnd ? '-' + data.reference.verseEnd : '');
       contentLayer.innerHTML = '<div class="content-text" style="font-size:clamp(1.5rem,4vw,4rem);">' + verseText + '</div><div class="bible-reference">' + escapeHtml(ref) + ' — ' + data.reference.version.toUpperCase() + '</div>';
     });
   }
 
   function renderSlide(data) {
-    const url = SIDECAR_URL + data.slides[data.currentIndex];
-    fadeContent(() => {
+    var url = SIDECAR_URL + data.slides[data.currentIndex];
+    fadeContent(function() {
       contentLayer.innerHTML = '<img class="slide-image" src="' + url + '" alt="Slide ' + (data.currentIndex + 1) + '" />';
     });
   }
 
   function renderImage(data) {
-    const url = SIDECAR_URL + data.url;
-    fadeContent(() => {
+    var url = SIDECAR_URL + data.url;
+    fadeContent(function() {
       contentLayer.innerHTML = '<img class="slide-image" src="' + url + '" alt="' + escapeHtml(data.filename) + '" />';
     });
   }
 
   function renderVideo(data, enableAudio) {
-    const url = SIDECAR_URL + data.url;
+    var url = SIDECAR_URL + data.url;
     if (data.action === "play") {
       if (currentVideo && currentVideo.src.endsWith(data.url)) {
         currentVideo.currentTime = data.timestamp || 0;
         currentVideo.play();
         return;
       }
-      fadeContent(() => {
+      fadeContent(function() {
         contentLayer.innerHTML = '<video class="video-player" ' + (enableAudio ? '' : 'muted') + ' autoplay></video>';
         currentVideo = contentLayer.querySelector("video");
         currentVideo.src = url;
@@ -70,13 +77,13 @@ function createRenderer(contentLayer, backgroundLayer) {
   }
 
   function renderNotice(data) {
-    fadeContent(() => {
+    fadeContent(function() {
       contentLayer.innerHTML = '<div class="notice-card"><h2>' + escapeHtml(data.title) + '</h2><p>' + escapeHtml(data.body) + '</p></div>';
     });
   }
 
   function clearContent() {
-    fadeContent(() => {
+    fadeContent(function() {
       contentLayer.innerHTML = "";
       if (currentVideo) { currentVideo.pause(); currentVideo.src = ""; currentVideo = null; }
     });
@@ -84,23 +91,68 @@ function createRenderer(contentLayer, backgroundLayer) {
 
   function setBackground(data) {
     if (!backgroundLayer) return;
+    var fit = data.fit || "cover";
+    var bgSize = FIT_CSS[fit] || "cover";
+
     if (data.type === "color") {
       backgroundLayer.style.backgroundImage = "none";
       backgroundLayer.style.backgroundColor = data.value;
+      backgroundLayer.style.backgroundSize = "";
       backgroundLayer.innerHTML = "";
     } else if (data.type === "gradient") {
       backgroundLayer.style.backgroundImage = data.value;
+      backgroundLayer.style.backgroundSize = "";
       backgroundLayer.innerHTML = "";
     } else if (data.type === "image") {
       backgroundLayer.style.backgroundImage = 'url(' + SIDECAR_URL + data.value + ')';
+      backgroundLayer.style.backgroundSize = bgSize;
+      backgroundLayer.style.backgroundPosition = "center";
+      backgroundLayer.style.backgroundRepeat = "no-repeat";
       backgroundLayer.innerHTML = "";
     } else if (data.type === "video") {
       backgroundLayer.style.backgroundImage = "none";
-      backgroundLayer.innerHTML = '<video src="' + SIDECAR_URL + data.value + '" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>';
+      backgroundLayer.style.backgroundSize = "";
+      var objFit = fit === "stretch" ? "fill" : fit === "center" ? "none" : fit;
+      backgroundLayer.innerHTML = '<video src="' + SIDECAR_URL + data.value + '" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:' + objFit + ';"></video>';
     }
   }
 
-  return { renderLyrics, renderBible, renderSlide, renderImage, renderVideo, renderNotice, clearContent, setBackground };
+  function setProjectionArea(area) {
+    var container = document.querySelector(".screen-container");
+    if (!container) return;
+    if (!area.enabled) {
+      container.style.width = "100vw";
+      container.style.height = "100vh";
+      container.style.margin = "0";
+      container.style.border = "none";
+    } else {
+      // Scale to fit within the viewport while maintaining the defined aspect ratio
+      var viewW = window.innerWidth;
+      var viewH = window.innerHeight;
+      var scale = Math.min(viewW / area.width, viewH / area.height);
+      var w = Math.round(area.width * scale);
+      var h = Math.round(area.height * scale);
+      container.style.width = w + "px";
+      container.style.height = h + "px";
+      container.style.margin = "auto";
+      container.style.position = "absolute";
+      container.style.top = "50%";
+      container.style.left = "50%";
+      container.style.transform = "translate(-50%, -50%)";
+    }
+  }
+
+  return {
+    renderLyrics: renderLyrics,
+    renderBible: renderBible,
+    renderSlide: renderSlide,
+    renderImage: renderImage,
+    renderVideo: renderVideo,
+    renderNotice: renderNotice,
+    clearContent: clearContent,
+    setBackground: setBackground,
+    setProjectionArea: setProjectionArea,
+  };
 }
 
 function bindScreenEvents(socket, renderer, options) {
@@ -113,4 +165,5 @@ function bindScreenEvents(socket, renderer, options) {
   socket.on("content:notice", function(data) { renderer.renderNotice(data); });
   socket.on("content:clear", function() { renderer.clearContent(); });
   socket.on("background:change", function(data) { renderer.setBackground(data); });
+  socket.on("projection:area", function(data) { renderer.setProjectionArea(data); });
 }

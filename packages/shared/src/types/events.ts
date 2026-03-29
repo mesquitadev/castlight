@@ -2,7 +2,7 @@ import type { ScreenRole, ContentType } from "../enums";
 import type { SongSection } from "./lyrics";
 import type { BibleVerse, BibleReference } from "./bible";
 import type { ScreenInfo } from "./screen";
-import type { VideoCommand, BackgroundConfig } from "./media";
+import type { VideoCommand, BackgroundConfig, ProjectionArea } from "./media";
 import type { StreamConfig, LowerThirdData, OBSStatus } from "./obs";
 
 // Client -> Server
@@ -28,6 +28,7 @@ export interface ServerToClientEvents {
   "stream:config": (config: StreamConfig) => void;
   "stream:lower-third": (data: LowerThirdData) => void;
   "obs:status": (status: OBSStatus) => void;
+  "projection:area": (area: ProjectionArea) => void;
 }
 
 // Server -> Server (inter-service)

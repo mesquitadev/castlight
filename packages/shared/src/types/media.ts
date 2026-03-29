@@ -37,7 +37,16 @@ export interface VideoCommand {
   timestamp: number;
 }
 
+export type BackgroundFit = "cover" | "contain" | "stretch" | "center";
+
 export interface BackgroundConfig {
   type: "image" | "video" | "color" | "gradient";
   value: string;
+  fit?: BackgroundFit;
+}
+
+export interface ProjectionArea {
+  width: number;
+  height: number;
+  enabled: boolean;
 }
