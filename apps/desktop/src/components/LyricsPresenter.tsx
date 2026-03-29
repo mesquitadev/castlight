@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { presentLyrics, clearPresentation } from "../store/slices/presentation";
-import type { Song } from "@castlight/shared";
+import { useUpdateSongMutation } from "../store/api";
+import type { Song, SongSection } from "@castlight/shared";
 import { SIDECAR_PORT, ScreenRole } from "@castlight/shared";
 
 interface Props {
@@ -13,11 +14,7 @@ function broadcast(event: string, data: any) {
   fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event,
-      roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor],
-      data,
-    }),
+    body: JSON.stringify({ event, roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor], data }),
   });
 }
 
@@ -34,16 +31,28 @@ export function LyricsPresenter({ song, onClose }: Props) {
   const dispatch = useDispatch();
   const [activeSlide, setActiveSlide] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [editing, setEditing] = useState(false);
+  const [editSections, setEditSections] = useState(song.sections.map((s) => ({ ...s })));
+  const [updateSong] = useUpdateSongMutation();
+  const listRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Map<number, HTMLElement>>(new Map());
   const total = song.sections.length;
+
+  // Auto-scroll in list view
+  useEffect(() => {
+    if (activeSlide !== null && viewMode === "list") {
+      const el = sectionRefs.current.get(activeSlide);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeSlide, viewMode]);
 
   const sendSlide = useCallback((index: number) => {
     if (index < 0 || index >= total) return;
     setActiveSlide(index);
     const section = song.sections[index];
     const nextSection = song.sections[index + 1] ?? null;
-    const data = { section, nextSection, song: { title: song.title, artist: song.artist, key: song.key } };
-    dispatch(presentLyrics(data));
-    broadcast("content:lyrics", data);
+    dispatch(presentLyrics({ section, nextSection, song: { title: song.title, artist: song.artist, key: song.key } }));
+    broadcast("content:lyrics", { section, nextSection, song: { title: song.title, artist: song.artist, key: song.key } });
   }, [song, total, dispatch]);
 
   const handleClear = useCallback(() => {
@@ -52,8 +61,14 @@ export function LyricsPresenter({ song, onClose }: Props) {
     restoreWallpaper();
   }, [dispatch]);
 
-  // Keyboard
+  const handleSaveEdit = async () => {
+    // TODO: update sections via API when endpoint supports it
+    setEditing(false);
+  };
+
+  // Keyboard (only when not editing)
   useEffect(() => {
+    if (editing) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
@@ -69,167 +84,147 @@ export function LyricsPresenter({ song, onClose }: Props) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeSlide, total, sendSlide, handleClear]);
-
-  // Icons
-  const ListIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-  );
-  const GridIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-  );
+  }, [activeSlide, total, sendSlide, handleClear, editing]);
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Top bar — like Holyrics: Title (Artist) centered + controls */}
+    <div style={{ height: "calc(100vh - 2rem)", display: "flex", flexDirection: "column" }}>
+      {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: "var(--color-surface-100)", borderBottom: "1px solid var(--color-surface-300)" }}>
-        <div className="flex items-center gap-3">
-          <button onClick={onClose} style={{ color: "var(--color-surface-700)" }}>
+        {/* Left: back + title */}
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={onClose} className="flex-shrink-0" style={{ color: "var(--color-surface-600)" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
+          <div className="min-w-0">
+            <span className="text-[13px] font-bold truncate block" style={{ color: "#fff" }}>{song.title}</span>
+            <span className="text-[11px] truncate block" style={{ color: "var(--color-surface-600)" }}>{song.artist}{song.key ? ` · ${song.key}` : ""}</span>
+          </div>
         </div>
 
-        <div className="text-center">
-          <span className="text-sm font-bold" style={{ color: "#fff" }}>{song.title}</span>
-          <span className="text-sm ml-2" style={{ color: "var(--color-surface-700)" }}>({song.artist})</span>
-        </div>
-
+        {/* Center: transport */}
         <div className="flex items-center gap-1">
-          {/* Play controls */}
-          <button onClick={() => activeSlide !== null && activeSlide > 0 ? sendSlide(activeSlide - 1) : null} disabled={activeSlide === null || activeSlide <= 0} className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-20" style={{ color: "var(--color-surface-800)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 20L9 12l10-8z"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+          <button onClick={() => activeSlide !== null && activeSlide > 0 && sendSlide(activeSlide - 1)} disabled={!activeSlide} className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-20" style={{ color: "var(--color-surface-800)" }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8z"/><rect x="5" y="5" width="2" height="14"/></svg>
           </button>
           {activeSlide === null ? (
-            <button onClick={() => sendSlide(0)} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: "var(--color-accent)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <button onClick={() => sendSlide(0)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--color-accent)", color: "var(--color-surface-50)" }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
             </button>
           ) : (
-            <button onClick={handleClear} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: "var(--color-danger)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            <button onClick={handleClear} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--color-danger)", color: "#fff" }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
             </button>
           )}
           <button onClick={() => { if (activeSlide === null) sendSlide(0); else if (activeSlide < total - 1) sendSlide(activeSlide + 1); }} disabled={activeSlide === total - 1} className="w-7 h-7 rounded flex items-center justify-center disabled:opacity-20" style={{ color: "var(--color-surface-800)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 4l10 8-10 8z"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8z"/><rect x="17" y="5" width="2" height="14"/></svg>
           </button>
+          <span className="text-[10px] ml-1 w-10 text-center" style={{ color: "var(--color-surface-600)", fontFamily: "var(--font-mono)" }}>
+            {activeSlide !== null ? `${activeSlide + 1}/${total}` : `${total}`}
+          </span>
+        </div>
 
-          <span className="w-px h-5 mx-1" style={{ background: "var(--color-surface-400)" }} />
-
-          {/* View mode toggle */}
-          <button onClick={() => setViewMode("list")} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: viewMode === "list" ? "var(--color-accent)" : "var(--color-surface-600)" }}><ListIcon /></button>
-          <button onClick={() => setViewMode("grid")} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: viewMode === "grid" ? "var(--color-accent)" : "var(--color-surface-600)" }}><GridIcon /></button>
+        {/* Right: actions */}
+        <div className="flex items-center gap-1">
+          <button onClick={() => setEditing(!editing)} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: editing ? "var(--color-accent)" : "var(--color-surface-600)" }} title="Editar letra">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <span className="w-px h-4" style={{ background: "var(--color-surface-400)" }} />
+          <button onClick={() => setViewMode("list")} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: viewMode === "list" ? "var(--color-accent)" : "var(--color-surface-600)" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+          </button>
+          <button onClick={() => setViewMode("grid")} className="w-7 h-7 rounded flex items-center justify-center" style={{ color: viewMode === "grid" ? "var(--color-accent)" : "var(--color-surface-600)" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
         </div>
       </div>
 
-      {/* Content area */}
+      {/* Content */}
       {viewMode === "list" ? (
-        /* LIST VIEW — sections as clickable text blocks + preview */
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left — section list (like Holyrics) */}
-          <div className="flex-1 overflow-y-auto" style={{ borderRight: "1px solid var(--color-surface-300)" }}>
+        <div className="flex-1 flex overflow-hidden min-h-0">
+          {/* Sections list with scroll */}
+          <div ref={listRef} className="flex-1 overflow-y-auto min-h-0">
             {song.sections.map((section, i) => {
               const isActive = activeSlide === i;
               return (
-                <button
+                <div
                   key={section.id}
-                  onClick={() => sendSlide(i)}
-                  className="w-full text-left px-4 py-3 transition-all"
-                  style={{
-                    background: isActive ? "rgba(34, 211, 238, 0.12)" : "transparent",
-                    borderBottom: "1px solid var(--color-surface-200)",
-                    borderLeft: isActive ? "3px solid var(--color-accent)" : "3px solid transparent",
-                  }}
+                  ref={(el) => { if (el) sectionRefs.current.set(i, el); }}
                 >
-                  <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{
-                    color: isActive ? "#fff" : "var(--color-surface-800)",
-                  }}>
-                    {section.text}
-                  </p>
-                </button>
+                  {editing ? (
+                    <div className="px-4 py-2" style={{ borderBottom: "1px solid var(--color-surface-200)", borderLeft: isActive ? "3px solid var(--color-accent)" : "3px solid transparent", background: isActive ? "rgba(34,211,238,0.08)" : "transparent" }}>
+                      <textarea
+                        value={editSections[i]?.text ?? section.text}
+                        onChange={(e) => {
+                          const next = [...editSections];
+                          next[i] = { ...next[i], text: e.target.value };
+                          setEditSections(next);
+                        }}
+                        className="w-full bg-transparent border-none resize-none text-[13px] leading-relaxed focus:outline-none"
+                        style={{ color: "#fff", fontFamily: "var(--font-mono)", minHeight: "60px" }}
+                        rows={Math.max(3, section.text.split("\n").length)}
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => sendSlide(i)}
+                      className="w-full text-left px-4 py-3 transition-all"
+                      style={{
+                        background: isActive ? "rgba(34,211,238,0.1)" : "transparent",
+                        borderBottom: "1px solid var(--color-surface-200)",
+                        borderLeft: isActive ? "3px solid var(--color-accent)" : "3px solid transparent",
+                      }}
+                    >
+                      <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: isActive ? "#fff" : "var(--color-surface-800)" }}>
+                        {section.text}
+                      </p>
+                    </button>
+                  )}
+                </div>
               );
             })}
-            {/* Empty slide at bottom to clear */}
-            <button
-              onClick={handleClear}
-              className="w-full text-left px-4 py-6 transition-all"
-              style={{
-                background: activeSlide === null ? "rgba(34, 211, 238, 0.05)" : "transparent",
-                borderLeft: activeSlide === null ? "3px solid var(--color-surface-500)" : "3px solid transparent",
-              }}
-            >
-              <p className="text-xs italic" style={{ color: "var(--color-surface-600)" }}>Slide vazio (limpar tela)</p>
+            {/* Clear slide */}
+            <button onClick={handleClear} className="w-full text-left px-4 py-4" style={{ borderLeft: activeSlide === null ? "3px solid var(--color-surface-500)" : "3px solid transparent" }}>
+              <p className="text-[11px] italic" style={{ color: "var(--color-surface-600)" }}>&nbsp;</p>
             </button>
           </div>
 
-          {/* Right — preview (like Holyrics) */}
-          <div className="w-80 flex-shrink-0 flex flex-col">
-            {/* Preview screen */}
-            <div className="flex-1 flex items-center justify-center p-4">
-              <div className="w-full aspect-video rounded-lg flex items-center justify-center p-6" style={{ background: "#1a1a1a", border: "1px solid var(--color-surface-300)" }}>
+          {/* Preview */}
+          <div className="w-72 flex-shrink-0 flex flex-col min-h-0" style={{ borderLeft: "1px solid var(--color-surface-300)" }}>
+            <div className="flex-1 flex items-center justify-center p-3">
+              <div className="w-full aspect-video rounded flex items-center justify-center p-4" style={{ background: "#111", border: "1px solid var(--color-surface-300)" }}>
                 {activeSlide !== null ? (
-                  <p className="text-sm text-center leading-relaxed whitespace-pre-line" style={{ color: "#fff", textShadow: "1px 1px 4px rgba(0,0,0,0.8)" }}>
+                  <p className="text-[11px] text-center leading-relaxed whitespace-pre-line" style={{ color: "#fff", textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}>
                     {song.sections[activeSlide].text}
                   </p>
                 ) : (
-                  <p className="text-xs" style={{ color: "var(--color-surface-600)" }}>Preview</p>
+                  <p className="text-[10px]" style={{ color: "var(--color-surface-600)" }}>Preview</p>
                 )}
               </div>
             </div>
-
-            {/* Bottom controls */}
-            <div className="p-3 space-y-2" style={{ borderTop: "1px solid var(--color-surface-300)" }}>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-semibold" style={{ color: "var(--color-surface-600)" }}>Tema</span>
-                <select className="input-field text-[10px] px-2 py-0.5" style={{ width: "auto" }}>
-                  <option>Padrao</option>
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <button className="btn btn-secondary" style={{ padding: "3px 8px", fontSize: "10px" }}>Todos</button>
-                <button className="btn btn-primary" style={{ padding: "3px 8px", fontSize: "10px" }}>Selecionadas</button>
-              </div>
+            {/* Info */}
+            <div className="px-3 py-2 text-center" style={{ borderTop: "1px solid var(--color-surface-300)" }}>
+              <p className="text-[10px]" style={{ color: "var(--color-surface-600)", fontFamily: "var(--font-mono)" }}>
+                ← → Navegar · Espaco Proximo · Esc Parar
+              </p>
             </div>
           </div>
         </div>
       ) : (
-        /* GRID VIEW — slides as cards side by side */
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-3 gap-3">
-            {/* Title slide */}
-            <button
-              onClick={handleClear}
-              className="aspect-video rounded-lg flex flex-col items-center justify-center transition-all"
-              style={{
-                background: "var(--color-surface-100)",
-                border: activeSlide === null ? "2px solid var(--color-surface-500)" : "1px solid var(--color-surface-300)",
-              }}
-            >
-              <p className="text-sm font-bold" style={{ color: "#fff" }}>{song.title}</p>
-              <p className="text-xs mt-1" style={{ color: "var(--color-surface-700)" }}>{song.artist}</p>
+        /* GRID VIEW */
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">
+          <div className="grid grid-cols-3 gap-2.5">
+            {/* Title card */}
+            <button onClick={handleClear} className="aspect-video rounded-lg flex flex-col items-center justify-center transition-all" style={{ background: "var(--color-surface-100)", border: activeSlide === null ? "2px solid var(--color-surface-500)" : "1px solid var(--color-surface-300)" }}>
+              <p className="text-[12px] font-bold" style={{ color: "#fff" }}>{song.title}</p>
+              <p className="text-[10px] mt-0.5" style={{ color: "var(--color-surface-700)" }}>{song.artist}</p>
             </button>
 
-            {/* Section slides */}
             {song.sections.map((section, i) => {
               const isActive = activeSlide === i;
               return (
-                <button
-                  key={section.id}
-                  onClick={() => sendSlide(i)}
-                  className="aspect-video rounded-lg p-3 flex flex-col items-center justify-center text-center transition-all overflow-hidden relative"
-                  style={{
-                    background: "var(--color-surface-100)",
-                    border: isActive ? "2px solid var(--color-accent)" : "1px solid var(--color-surface-300)",
-                    boxShadow: isActive ? "0 0 12px var(--color-accent-glow)" : "none",
-                  }}
-                >
-                  <span className="absolute top-1.5 left-1.5 text-[8px] font-bold rounded px-1 py-0.5" style={{
-                    background: isActive ? "var(--color-accent)" : "var(--color-surface-400)",
-                    color: isActive ? "var(--color-surface-50)" : "var(--color-surface-800)",
-                  }}>{i + 1}</span>
-                  <p className="text-[11px] leading-relaxed whitespace-pre-line line-clamp-5" style={{
-                    color: isActive ? "#fff" : "var(--color-surface-800)",
-                  }}>
-                    {section.text}
-                  </p>
+                <button key={section.id} onClick={() => sendSlide(i)} className="aspect-video rounded-lg p-3 flex items-center justify-center text-center transition-all overflow-hidden relative" style={{ background: "var(--color-surface-100)", border: isActive ? "2px solid var(--color-accent)" : "1px solid var(--color-surface-300)", boxShadow: isActive ? "0 0 10px var(--color-accent-glow)" : "none" }}>
+                  <span className="absolute top-1.5 left-1.5 text-[8px] font-bold rounded px-1 py-0.5" style={{ background: isActive ? "var(--color-accent)" : "var(--color-surface-400)", color: isActive ? "var(--color-surface-50)" : "var(--color-surface-800)" }}>{i + 1}</span>
+                  <p className="text-[10px] leading-relaxed whitespace-pre-line line-clamp-5" style={{ color: isActive ? "#fff" : "var(--color-surface-800)" }}>{section.text}</p>
                 </button>
               );
             })}
