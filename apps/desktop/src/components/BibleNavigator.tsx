@@ -167,6 +167,13 @@ export function BibleNavigator() {
   const verseListRef = useRef<HTMLDivElement>(null);
   const verseRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
+  // Hover state for verse buttons
+  const [hoveredVerse, setHoveredVerse] = useState<number | null>(null);
+  // Hover state for chapter buttons
+  const [hoveredChapter, setHoveredChapter] = useState<number | null>(null);
+  // Hover state for verse number buttons
+  const [hoveredVerseNum, setHoveredVerseNum] = useState<number | null>(null);
+
   const { data: versions = [] } = useGetBibleVersionsQuery();
   const { data: books = [] } = useGetBibleBooksQuery(version);
   const { data: backgrounds = [] } = useGetMediaFilesQuery("background");
@@ -294,8 +301,16 @@ export function BibleNavigator() {
       {/* Quick search modal */}
       {showQuickSearch && (
         <div className="absolute inset-0 z-50 flex items-start justify-center pt-20 bg-black/50">
-          <div className="bg-zinc-800 rounded-xl p-6 w-96 shadow-2xl border border-zinc-700">
-            <p className="text-zinc-400 text-xs mb-2">Digite uma referencia para localizar o versiculo</p>
+          <div
+            className="rounded-xl p-6 w-96 shadow-2xl"
+            style={{
+              background: "var(--color-surface-200)",
+              border: "1px solid var(--color-surface-300)",
+            }}
+          >
+            <p className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
+              Digite uma referência para localizar o versículo
+            </p>
             <input
               ref={quickSearchRef}
               type="text"
@@ -306,16 +321,24 @@ export function BibleNavigator() {
                 if (e.key === "Escape") { e.preventDefault(); setShowQuickSearch(false); setQuickSearch(""); }
               }}
               placeholder="Ex: Jo 3:16, Genesis 1:1, Sl 23"
-              className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white text-lg placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg px-4 py-3 text-lg"
+              style={{
+                background: "var(--color-surface-100)",
+                border: "1px solid var(--color-surface-300)",
+                color: "var(--color-text-primary)",
+                outline: "none",
+              }}
+              onFocus={(e) => { e.currentTarget.style.outline = `2px solid var(--color-accent)`; e.currentTarget.style.outlineOffset = "2px"; }}
+              onBlur={(e) => { e.currentTarget.style.outline = "none"; }}
               autoFocus
             />
-            <div className="mt-3 flex items-center justify-between text-zinc-500 text-xs">
+            <div className="mt-3 flex items-center justify-between text-xs" style={{ color: "var(--color-text-muted)" }}>
               <span>Enter para ir | Esc para fechar</span>
               {quickSearch && (() => {
                 const parsed = parseReference(quickSearch, books);
                 return parsed
                   ? <span className="text-green-400">{parsed.book} {parsed.chapter}{parsed.verse ? `:${parsed.verse}` : ""}</span>
-                  : <span className="text-red-400">Referencia nao encontrada</span>;
+                  : <span className="text-red-400">Referência não encontrada</span>;
               })()}
             </div>
           </div>
@@ -323,10 +346,19 @@ export function BibleNavigator() {
       )}
 
       {/* Left panel — Verse text (main area, like Holyrics) */}
-      <div className="flex-1 flex flex-col bg-zinc-900 rounded-lg overflow-hidden">
+      <div
+        className="flex-1 flex flex-col rounded-lg overflow-hidden"
+        style={{ background: "var(--color-surface-100)" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-zinc-800 border-b border-zinc-700">
-          <h3 className="text-white font-semibold text-sm">
+        <div
+          className="flex items-center justify-between px-4 py-2"
+          style={{
+            background: "var(--color-surface-200)",
+            borderBottom: "1px solid var(--color-surface-300)",
+          }}
+        >
+          <h3 className="font-semibold text-sm" style={{ color: "var(--color-text-primary)" }}>
             {selectedBook && selectedChapter
               ? `${selectedBook} ${selectedChapter}`
               : "Selecione um livro"}
@@ -334,7 +366,12 @@ export function BibleNavigator() {
           <select
             value={version}
             onChange={(e) => { setVersion(e.target.value); setSelectedBook(null); setSelectedChapter(null); setSelectedVerse(null); }}
-            className="bg-zinc-700 border border-zinc-600 rounded px-2 py-1 text-white text-xs"
+            className="rounded px-2 py-1 text-xs"
+            style={{
+              background: "var(--color-surface-300)",
+              border: "1px solid var(--color-surface-400)",
+              color: "var(--color-text-primary)",
+            }}
           >
             {versions.map((v) => (
               <option key={v.id} value={v.id}>{v.id.toUpperCase()}</option>
@@ -343,11 +380,22 @@ export function BibleNavigator() {
         </div>
 
         {/* Bible background picker */}
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-850 border-b border-zinc-700">
-          <span className="text-zinc-500 text-xs">Fundo:</span>
+        <div
+          className="flex items-center gap-2 px-3 py-1.5"
+          style={{ borderBottom: "1px solid var(--color-surface-300)" }}
+        >
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Fundo:</span>
           <button
             onClick={() => { setBibleBg(null); saveSetting({ key: "bible_background", value: null }); }}
-            className={`w-6 h-6 rounded border ${!bibleBg ? "ring-2 ring-blue-500 border-blue-500" : "border-zinc-600"} bg-zinc-950`}
+            className="w-6 h-6 rounded"
+            style={{
+              background: "var(--color-surface-50)",
+              border: !bibleBg
+                ? `2px solid var(--color-accent)`
+                : `1px solid var(--color-surface-400)`,
+              outline: !bibleBg ? `2px solid var(--color-accent)` : "none",
+              outlineOffset: "1px",
+            }}
             title="Sem fundo (usa papel de parede)"
           />
           {backgrounds.map((bg) => {
@@ -357,7 +405,12 @@ export function BibleNavigator() {
               <button
                 key={bg.id}
                 onClick={() => { setBibleBg(config); saveSetting({ key: "bible_background", value: config }); }}
-                className={`w-6 h-6 rounded overflow-hidden ${isActive ? "ring-2 ring-blue-500" : "border border-zinc-600"}`}
+                className="w-6 h-6 rounded overflow-hidden"
+                style={{
+                  outline: isActive ? `2px solid var(--color-accent)` : "none",
+                  outlineOffset: "1px",
+                  border: isActive ? "none" : `1px solid var(--color-surface-400)`,
+                }}
                 title={bg.originalFilename}
               >
                 <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`} className="w-full h-full object-cover" alt="" />
@@ -368,7 +421,7 @@ export function BibleNavigator() {
             type="color"
             className="w-6 h-6 rounded cursor-pointer border-0 p-0"
             onChange={(e) => { const c: BackgroundConfig = { type: "color", value: e.target.value }; setBibleBg(c); saveSetting({ key: "bible_background", value: c }); }}
-            title="Cor solida"
+            title="Cor sólida"
           />
         </div>
 
@@ -381,13 +434,25 @@ export function BibleNavigator() {
                   key={verse.verse}
                   ref={(el) => { if (el) verseRefs.current.set(verse.verse, el); }}
                   onClick={() => sendVerse(verse.verse)}
-                  className={`w-full text-left px-3 py-2.5 rounded transition-colors ${
+                  onMouseEnter={() => setHoveredVerse(verse.verse)}
+                  onMouseLeave={() => setHoveredVerse(null)}
+                  className="w-full text-left px-3 py-2.5 rounded transition-colors"
+                  style={
                     selectedVerse === verse.verse
-                      ? "bg-blue-600 text-white"
-                      : "hover:bg-zinc-800 text-zinc-200"
-                  }`}
+                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
+                      : hoveredVerse === verse.verse
+                      ? { background: "var(--color-surface-200)", color: "var(--color-text-primary)" }
+                      : { background: "transparent", color: "var(--color-text-secondary)" }
+                  }
                 >
-                  <span className={`text-xs font-bold mr-2 ${selectedVerse === verse.verse ? "text-blue-200" : "text-blue-400"}`}>
+                  <span
+                    className="text-xs font-bold mr-2"
+                    style={{
+                      color: selectedVerse === verse.verse
+                        ? "var(--color-surface-100)"
+                        : "var(--color-accent)",
+                    }}
+                  >
                     {verse.verse}
                   </span>
                   <span className="text-sm leading-relaxed">{verse.text}</span>
@@ -396,17 +461,26 @@ export function BibleNavigator() {
             </div>
           ) : (
             <div className="h-full flex items-center justify-center">
-              <p className="text-zinc-600 text-sm">Selecione um livro e capitulo</p>
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+                Selecione um livro e capítulo
+              </p>
             </div>
           )}
         </div>
 
         {/* Footer info */}
-        <div className="px-4 py-2 bg-zinc-800 border-t border-zinc-700 text-zinc-500 text-xs flex items-center justify-between">
+        <div
+          className="px-4 py-2 text-xs flex items-center justify-between"
+          style={{
+            background: "var(--color-surface-200)",
+            borderTop: "1px solid var(--color-surface-300)",
+            color: "var(--color-text-muted)",
+          }}
+        >
           <span>
             {selectedVerse
               ? `${selectedBook} ${selectedChapter}:${selectedVerse} — ${version.toUpperCase()}`
-              : "↑↓ Navegar | Esc Limpar | Digite para busca rapida (ex: Jo 3:16)"}
+              : "↑↓ Navegar | Esc Limpar | Digite para busca rápida (ex: Jo 3:16)"}
           </span>
           {selectedVerse && (
             <span>{selectedVerse} de {verses.length}</span>
@@ -414,10 +488,13 @@ export function BibleNavigator() {
         </div>
       </div>
 
-      {/* Right panel — Books + Chapters + Verse numbers */}
+      {/* Right panel — Livros + Capítulos + Versículos */}
       <div className="w-80 flex-shrink-0 flex flex-col gap-2 overflow-hidden">
         {/* Books grid */}
-        <div className="flex-1 overflow-y-auto bg-zinc-900 rounded-lg p-2">
+        <div
+          className="flex-1 overflow-y-auto rounded-lg p-2"
+          style={{ background: "var(--color-surface-100)" }}
+        >
           <div className="grid grid-cols-5 gap-1">
             {books.map((book) => {
               const style = getBookStyle(book.name);
@@ -427,10 +504,18 @@ export function BibleNavigator() {
                   key={book.abbr}
                   onClick={() => { setSelectedBook(book.name); setSelectedChapter(1); setSelectedVerse(null); }}
                   title={book.name}
-                  className={`rounded p-1 text-center transition-all text-[10px] font-bold leading-tight ${
-                    isSelected ? "ring-2 ring-white scale-105 z-10" : "hover:brightness-125"
-                  }`}
-                  style={{ backgroundColor: style.bg, color: style.color }}
+                  className="rounded p-1 text-center transition-all text-[10px] font-bold leading-tight"
+                  style={{
+                    backgroundColor: style.bg,
+                    color: style.color,
+                    outline: isSelected ? `2px solid var(--color-text-primary)` : "none",
+                    outlineOffset: "1px",
+                    transform: isSelected ? "scale(1.05)" : "scale(1)",
+                    zIndex: isSelected ? 10 : "auto",
+                    filter: "brightness(1)",
+                  }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.filter = "brightness(1.25)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.filter = "brightness(1)"; }}
                 >
                   <div className="text-xs">{book.abbr}</div>
                   <div className="text-[8px] font-normal opacity-70 truncate">{book.name}</div>
@@ -440,19 +525,27 @@ export function BibleNavigator() {
           </div>
         </div>
 
-        {/* Chapters */}
+        {/* Capítulos */}
         {selectedBook && currentBook && (
-          <div className="bg-zinc-900 rounded-lg p-2 max-h-36 overflow-y-auto">
+          <div
+            className="rounded-lg p-2 max-h-36 overflow-y-auto"
+            style={{ background: "var(--color-surface-100)" }}
+          >
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => (
                 <button
                   key={ch}
                   onClick={() => { setSelectedChapter(ch); setSelectedVerse(null); }}
-                  className={`rounded p-1 text-[11px] font-medium transition-colors ${
+                  onMouseEnter={() => setHoveredChapter(ch)}
+                  onMouseLeave={() => setHoveredChapter(null)}
+                  className="rounded p-1 text-[11px] font-medium transition-colors"
+                  style={
                     selectedChapter === ch
-                      ? "bg-blue-600 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
+                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
+                      : hoveredChapter === ch
+                      ? { background: "var(--color-surface-300)", color: "var(--color-text-primary)" }
+                      : { background: "var(--color-surface-200)", color: "var(--color-text-secondary)" }
+                  }
                 >
                   {ch}
                 </button>
@@ -461,19 +554,27 @@ export function BibleNavigator() {
           </div>
         )}
 
-        {/* Verse numbers */}
+        {/* Versículos */}
         {selectedChapter && verses.length > 0 && (
-          <div className="bg-zinc-900 rounded-lg p-2 max-h-36 overflow-y-auto">
+          <div
+            className="rounded-lg p-2 max-h-36 overflow-y-auto"
+            style={{ background: "var(--color-surface-100)" }}
+          >
             <div className="grid grid-cols-7 gap-1">
               {verses.map((v) => (
                 <button
                   key={v.verse}
                   onClick={() => sendVerse(v.verse)}
-                  className={`rounded p-1 text-[11px] font-medium transition-colors ${
+                  onMouseEnter={() => setHoveredVerseNum(v.verse)}
+                  onMouseLeave={() => setHoveredVerseNum(null)}
+                  className="rounded p-1 text-[11px] font-medium transition-colors"
+                  style={
                     selectedVerse === v.verse
-                      ? "bg-blue-600 text-white"
-                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                  }`}
+                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
+                      : hoveredVerseNum === v.verse
+                      ? { background: "var(--color-surface-300)", color: "var(--color-text-primary)" }
+                      : { background: "var(--color-surface-200)", color: "var(--color-text-secondary)" }
+                  }
                 >
                   {v.verse}
                 </button>
