@@ -5,6 +5,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Lyrics } from "./pages/Lyrics";
 import { Bible } from "./pages/Bible";
+import { Media } from "./pages/Media";
 import { Screens } from "./pages/Screens";
 import { Settings } from "./pages/Settings";
 
@@ -12,6 +13,7 @@ const PAGES = {
   dashboard: Dashboard,
   lyrics: Lyrics,
   bible: Bible,
+  media: Media,
   screens: Screens,
   settings: Settings,
 } as const;

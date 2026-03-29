@@ -4,29 +4,19 @@ import { StreamTab } from "../components/settings/StreamTab";
 import { BiblesTab } from "../components/settings/BiblesTab";
 import { ProjectionTab } from "../components/settings/ProjectionTab";
 import { ThemesTab } from "../components/settings/ThemesTab";
-import { SlidesTab } from "../components/media/SlidesTab";
-import { ImagesTab } from "../components/media/ImagesTab";
-import { VideosTab } from "../components/media/VideosTab";
-import { NoticesTab } from "../components/media/NoticesTab";
-import { BackgroundsTab } from "../components/media/BackgroundsTab";
 
 const SECTIONS = [
   {
-    label: "Conteudo",
+    label: "Aparencia",
     tabs: [
       { id: "themes", label: "Temas" },
-      { id: "backgrounds", label: "Backgrounds" },
-      { id: "slides", label: "Slides" },
-      { id: "images", label: "Imagens" },
-      { id: "videos", label: "Videos" },
-      { id: "notices", label: "Avisos" },
+      { id: "projection", label: "Projecao" },
     ],
   },
   {
-    label: "Sistema",
+    label: "Integracao",
     tabs: [
       { id: "bibles", label: "Biblias" },
-      { id: "projection", label: "Projecao" },
       { id: "obs", label: "OBS" },
       { id: "stream", label: "Stream" },
     ],
@@ -37,13 +27,8 @@ type TabId = (typeof SECTIONS)[number]["tabs"][number]["id"];
 
 const TAB_COMPONENTS: Record<TabId, React.FC> = {
   themes: ThemesTab,
-  backgrounds: BackgroundsTab,
-  slides: SlidesTab,
-  images: ImagesTab,
-  videos: VideosTab,
-  notices: NoticesTab,
-  bibles: BiblesTab,
   projection: ProjectionTab,
+  bibles: BiblesTab,
   obs: OBSTab,
   stream: StreamTab,
 };
