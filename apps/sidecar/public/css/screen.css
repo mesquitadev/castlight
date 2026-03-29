@@ -1,0 +1,21 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; background: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+.screen-container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+.background-layer { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; transition: background-image 0.5s ease; }
+.background-layer video { width: 100%; height: 100%; object-fit: cover; }
+.content-layer { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 5vh 8vw; transition: opacity 0.4s ease; }
+.content-layer.fade-out { opacity: 0; }
+.content-layer.fade-in { opacity: 1; }
+.content-text { font-size: clamp(2rem, 5vw, 5rem); text-align: center; line-height: 1.4; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); white-space: pre-line; }
+.bible-reference { position: absolute; bottom: 5vh; right: 8vw; font-size: clamp(1rem, 2vw, 2rem); opacity: 0.8; text-shadow: 1px 1px 4px rgba(0,0,0,0.8); }
+.notice-card { background: rgba(0,0,0,0.7); border-radius: 1.5rem; padding: 3rem 4rem; text-align: center; backdrop-filter: blur(10px); }
+.notice-card h2 { font-size: clamp(2rem, 4vw, 4rem); margin-bottom: 1rem; }
+.notice-card p { font-size: clamp(1.2rem, 2.5vw, 2.5rem); opacity: 0.8; }
+.lower-third { position: absolute; bottom: 0; left: 0; right: 0; z-index: 20; padding: 1rem 2rem; background: linear-gradient(transparent, rgba(0,0,0,0.8)); transform: translateY(100%); transition: transform 0.4s ease; }
+.lower-third.visible { transform: translateY(0); }
+.lower-third .text { font-size: 1.5rem; font-weight: 600; }
+.lower-third .subtext { font-size: 1rem; opacity: 0.7; }
+@keyframes identify-flash { 0%, 100% { background: transparent; } 50% { background: rgba(59, 130, 246, 0.5); } }
+.identifying { animation: identify-flash 0.5s ease 3; }
+.video-player { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
+.slide-image { max-width: 100vw; max-height: 100vh; object-fit: contain; }
