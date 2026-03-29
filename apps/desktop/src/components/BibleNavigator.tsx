@@ -4,153 +4,60 @@ import {
   useGetBibleVersionsQuery,
   useGetBibleBooksQuery,
   useGetBibleVersesQuery,
-  useGetMediaFilesQuery,
-  useGetSettingQuery,
-  useSaveSettingMutation,
 } from "../store/api";
 import { presentBible, clearPresentation } from "../store/slices/presentation";
 import { SIDECAR_PORT, ScreenRole } from "@castlight/shared";
-import type { BackgroundConfig } from "@castlight/shared";
 
-const BOOK_CATEGORIES: Record<string, { color: string; bg: string }> = {
-  // Pentateuco
-  "Gênesis": { color: "#fff", bg: "#b45309" }, Genesis: { color: "#fff", bg: "#b45309" },
-  "Êxodo": { color: "#fff", bg: "#b45309" }, Exodo: { color: "#fff", bg: "#b45309" },
-  "Levítico": { color: "#fff", bg: "#b45309" }, Levitico: { color: "#fff", bg: "#b45309" },
-  "Números": { color: "#fff", bg: "#b45309" }, Numeros: { color: "#fff", bg: "#b45309" },
-  "Deuteronômio": { color: "#fff", bg: "#b45309" }, Deuteronomio: { color: "#fff", bg: "#b45309" },
-  // Historicos
-  "Josué": { color: "#fff", bg: "#059669" }, Josue: { color: "#fff", bg: "#059669" },
-  "Juízes": { color: "#fff", bg: "#059669" }, Juizes: { color: "#fff", bg: "#059669" },
-  Rute: { color: "#fff", bg: "#059669" },
-  "1 Samuel": { color: "#fff", bg: "#059669" }, "1Samuel": { color: "#fff", bg: "#059669" },
-  "2 Samuel": { color: "#fff", bg: "#059669" }, "2Samuel": { color: "#fff", bg: "#059669" },
-  "1 Reis": { color: "#fff", bg: "#059669" }, "1Reis": { color: "#fff", bg: "#059669" },
-  "2 Reis": { color: "#fff", bg: "#dc2626" }, "2Reis": { color: "#fff", bg: "#dc2626" },
-  "1 Crônicas": { color: "#fff", bg: "#dc2626" }, "1Cronicas": { color: "#fff", bg: "#dc2626" }, "1 Cronicas": { color: "#fff", bg: "#dc2626" },
-  "2 Crônicas": { color: "#fff", bg: "#dc2626" }, "2Cronicas": { color: "#fff", bg: "#dc2626" }, "2 Cronicas": { color: "#fff", bg: "#dc2626" },
-  Esdras: { color: "#fff", bg: "#dc2626" },
-  Neemias: { color: "#fff", bg: "#dc2626" },
-  Ester: { color: "#fff", bg: "#dc2626" },
-  // Poeticos
-  "Jó": { color: "#fff", bg: "#7c3aed" }, Jo: { color: "#fff", bg: "#7c3aed" },
-  Salmos: { color: "#fff", bg: "#7c3aed" },
-  "Provérbios": { color: "#fff", bg: "#7c3aed" }, Proverbios: { color: "#fff", bg: "#7c3aed" },
-  Eclesiastes: { color: "#fff", bg: "#7c3aed" },
-  "Cânticos": { color: "#fff", bg: "#7c3aed" }, Cantares: { color: "#fff", bg: "#7c3aed" }, "Cântico dos Cânticos": { color: "#fff", bg: "#7c3aed" },
-  // Profetas Maiores
-  "Isaías": { color: "#fff", bg: "#2563eb" }, Isaias: { color: "#fff", bg: "#2563eb" },
-  Jeremias: { color: "#fff", bg: "#2563eb" },
-  "Lamentações": { color: "#fff", bg: "#2563eb" }, Lamentacoes: { color: "#fff", bg: "#2563eb" },
-  Ezequiel: { color: "#fff", bg: "#2563eb" },
-  Daniel: { color: "#fff", bg: "#2563eb" },
-  // Profetas Menores
-  "Oséias": { color: "#fff", bg: "#0891b2" }, Oseias: { color: "#fff", bg: "#0891b2" },
-  Joel: { color: "#fff", bg: "#0891b2" },
-  "Amós": { color: "#fff", bg: "#0891b2" }, Amos: { color: "#fff", bg: "#0891b2" },
-  Obadias: { color: "#fff", bg: "#0891b2" },
-  Jonas: { color: "#fff", bg: "#0891b2" },
-  "Miquéias": { color: "#fff", bg: "#0891b2" }, Miqueias: { color: "#fff", bg: "#0891b2" },
-  Naum: { color: "#fff", bg: "#0891b2" },
-  Habacuque: { color: "#fff", bg: "#0891b2" },
-  Sofonias: { color: "#fff", bg: "#0891b2" },
-  Ageu: { color: "#fff", bg: "#0891b2" },
-  Zacarias: { color: "#fff", bg: "#0891b2" },
-  Malaquias: { color: "#fff", bg: "#0891b2" },
-  // Evangelhos
-  Mateus: { color: "#fff", bg: "#16a34a" },
-  Marcos: { color: "#fff", bg: "#16a34a" },
-  Lucas: { color: "#fff", bg: "#16a34a" },
-  "João": { color: "#fff", bg: "#16a34a" }, Joao: { color: "#fff", bg: "#16a34a" },
-  // Historico NT
-  Atos: { color: "#fff", bg: "#ea580c" },
-  // Cartas Paulinas
-  Romanos: { color: "#fff", bg: "#9333ea" },
-  "1 Coríntios": { color: "#fff", bg: "#9333ea" }, "1Corintios": { color: "#fff", bg: "#9333ea" }, "1 Corintios": { color: "#fff", bg: "#9333ea" },
-  "2 Coríntios": { color: "#fff", bg: "#9333ea" }, "2Corintios": { color: "#fff", bg: "#9333ea" }, "2 Corintios": { color: "#fff", bg: "#9333ea" },
-  "Gálatas": { color: "#fff", bg: "#9333ea" }, Galatas: { color: "#fff", bg: "#9333ea" },
-  "Efésios": { color: "#fff", bg: "#9333ea" }, Efesios: { color: "#fff", bg: "#9333ea" },
-  Filipenses: { color: "#fff", bg: "#9333ea" },
-  Colossenses: { color: "#fff", bg: "#9333ea" },
-  "1 Tessalonicenses": { color: "#fff", bg: "#9333ea" },
-  "2 Tessalonicenses": { color: "#fff", bg: "#9333ea" },
-  "1 Timóteo": { color: "#fff", bg: "#9333ea" }, "1Timoteo": { color: "#fff", bg: "#9333ea" }, "1 Timoteo": { color: "#fff", bg: "#9333ea" },
-  "2 Timóteo": { color: "#fff", bg: "#9333ea" }, "2Timoteo": { color: "#fff", bg: "#9333ea" }, "2 Timoteo": { color: "#fff", bg: "#9333ea" },
-  Tito: { color: "#fff", bg: "#9333ea" },
-  Filemom: { color: "#fff", bg: "#9333ea" }, "Filemon": { color: "#fff", bg: "#9333ea" },
-  Hebreus: { color: "#fff", bg: "#9333ea" },
-  // Cartas Gerais
-  Tiago: { color: "#fff", bg: "#e11d48" },
-  "1 Pedro": { color: "#fff", bg: "#e11d48" },
-  "2 Pedro": { color: "#fff", bg: "#e11d48" },
-  "1 João": { color: "#fff", bg: "#e11d48" }, "1Joao": { color: "#fff", bg: "#e11d48" }, "1 Joao": { color: "#fff", bg: "#e11d48" },
-  "2 João": { color: "#fff", bg: "#e11d48" }, "2Joao": { color: "#fff", bg: "#e11d48" }, "2 Joao": { color: "#fff", bg: "#e11d48" },
-  "3 João": { color: "#fff", bg: "#e11d48" }, "3Joao": { color: "#fff", bg: "#e11d48" }, "3 Joao": { color: "#fff", bg: "#e11d48" },
-  Judas: { color: "#fff", bg: "#e11d48" },
-  Apocalipse: { color: "#fff", bg: "#e11d48" },
-};
+// Book colors by category (Holyrics style)
+const CATEGORY_COLORS: Record<string, string> = {};
+const assignColor = (names: string[], color: string) => names.forEach((n) => { CATEGORY_COLORS[n] = color; });
+// Pentateuco
+assignColor(["Gênesis","Genesis","Êxodo","Exodo","Levítico","Levitico","Números","Numeros","Deuteronômio","Deuteronomio"], "#0d9488");
+// Históricos 1
+assignColor(["Josué","Josue","Juízes","Juizes","Rute","1 Samuel","1Samuel","2 Samuel","2Samuel","1 Reis","1Reis"], "#2563eb");
+// Históricos 2
+assignColor(["2 Reis","2Reis","1 Crônicas","1 Cronicas","1Cronicas","2 Crônicas","2 Cronicas","2Cronicas","Esdras"], "#dc2626");
+// Históricos 3
+assignColor(["Neemias","Ester"], "#dc2626");
+// Poéticos
+assignColor(["Jó","Jo","Salmos","Provérbios","Proverbios","Eclesiastes","Cânticos","Cantares","Cântico dos Cânticos"], "#7c3aed");
+// Profetas Maiores
+assignColor(["Isaías","Isaias","Jeremias","Lamentações","Lamentacoes","Ezequiel","Daniel"], "#2563eb");
+// Profetas Menores
+assignColor(["Oséias","Oseias","Joel","Amós","Amos","Obadias","Jonas","Miquéias","Miqueias","Naum","Habacuque","Sofonias","Ageu","Zacarias","Malaquias"], "#0891b2");
+// Evangelhos
+assignColor(["Mateus","Marcos","Lucas","João","Joao"], "#16a34a");
+// Atos
+assignColor(["Atos"], "#ea580c");
+// Cartas Paulinas
+assignColor(["Romanos","1 Coríntios","1 Corintios","1Corintios","2 Coríntios","2 Corintios","2Corintios","Gálatas","Galatas","Efésios","Efesios","Filipenses","Colossenses","1 Tessalonicenses","2 Tessalonicenses","1 Timóteo","1 Timoteo","1Timoteo","2 Timóteo","2 Timoteo","2Timoteo","Tito","Filemom","Filemon","Hebreus"], "#9333ea");
+// Cartas Gerais + Apocalipse
+assignColor(["Tiago","1 Pedro","2 Pedro","1 João","1 Joao","1Joao","2 João","2 Joao","2Joao","3 João","3 Joao","3Joao","Judas","Apocalipse"], "#e11d48");
 
-const DEFAULT_BOOK_STYLE = { color: "#fff", bg: "#525252" };
+function getBookColor(name: string) { return CATEGORY_COLORS[name] ?? "#525252"; }
 
-function getBookStyle(name: string) {
-  return BOOK_CATEGORIES[name] ?? DEFAULT_BOOK_STYLE;
-}
-
-function broadcastClear() {
+function broadcast(event: string, data: any) {
   fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event: "content:clear",
-      roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor],
-      data: "blank",
-    }),
-  });
-}
-
-function broadcastBackground(config: BackgroundConfig) {
-  fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event: "background:change",
-      roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor],
-      data: config,
-    }),
+    body: JSON.stringify({ event, roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor], data }),
   });
 }
 
 function parseReference(input: string, books: Array<{ name: string; abbr: string }>) {
-  // Formats: "Jo 3:16", "Genesis 1:1", "Gn 1 1", "jo3:16", "salmos 23"
   const cleaned = input.trim();
-
-  // Try to match: book chapter:verse or book chapter verse
   const match = cleaned.match(/^(.+?)\s*(\d+)\s*[:\s.,]\s*(\d+)$/);
   if (match) {
-    const bookQuery = match[1].trim().toLowerCase();
-    const chapter = parseInt(match[2]);
-    const verse = parseInt(match[3]);
-    const book = books.find((b) =>
-      b.name.toLowerCase().startsWith(bookQuery) ||
-      b.abbr.toLowerCase() === bookQuery ||
-      b.abbr.toLowerCase().startsWith(bookQuery)
-    );
-    if (book) return { book: book.name, chapter, verse };
+    const q = match[1].trim().toLowerCase();
+    const book = books.find((b) => b.name.toLowerCase().startsWith(q) || b.abbr.toLowerCase() === q || b.abbr.toLowerCase().startsWith(q));
+    if (book) return { book: book.name, chapter: parseInt(match[2]), verse: parseInt(match[3]) };
   }
-
-  // Try: book chapter (no verse)
-  const matchChapter = cleaned.match(/^(.+?)\s*(\d+)$/);
-  if (matchChapter) {
-    const bookQuery = matchChapter[1].trim().toLowerCase();
-    const chapter = parseInt(matchChapter[2]);
-    const book = books.find((b) =>
-      b.name.toLowerCase().startsWith(bookQuery) ||
-      b.abbr.toLowerCase() === bookQuery ||
-      b.abbr.toLowerCase().startsWith(bookQuery)
-    );
-    if (book) return { book: book.name, chapter, verse: null };
+  const matchCh = cleaned.match(/^(.+?)\s*(\d+)$/);
+  if (matchCh) {
+    const q = matchCh[1].trim().toLowerCase();
+    const book = books.find((b) => b.name.toLowerCase().startsWith(q) || b.abbr.toLowerCase() === q || b.abbr.toLowerCase().startsWith(q));
+    if (book) return { book: book.name, chapter: parseInt(matchCh[2]), verse: null };
   }
-
   return null;
 }
 
@@ -160,33 +67,14 @@ export function BibleNavigator() {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
-  const [bibleBg, setBibleBg] = useState<BackgroundConfig | null>(null);
   const [quickSearch, setQuickSearch] = useState("");
   const [showQuickSearch, setShowQuickSearch] = useState(false);
   const quickSearchRef = useRef<HTMLInputElement>(null);
-  const verseListRef = useRef<HTMLDivElement>(null);
-  const verseRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
-
-  // Hover state for verse buttons
-  const [hoveredVerse, setHoveredVerse] = useState<number | null>(null);
-  // Hover state for chapter buttons
-  const [hoveredChapter, setHoveredChapter] = useState<number | null>(null);
-  // Hover state for verse number buttons
-  const [hoveredVerseNum, setHoveredVerseNum] = useState<number | null>(null);
+  const verseRefs = useRef<Map<number, HTMLElement>>(new Map());
 
   const { data: versions = [] } = useGetBibleVersionsQuery();
   const { data: books = [] } = useGetBibleBooksQuery(version);
-  const { data: backgrounds = [] } = useGetMediaFilesQuery("background");
-  const { data: savedBibleBg } = useGetSettingQuery("bible_background");
-  const [saveSetting] = useSaveSettingMutation();
   const currentBook = books.find((b) => b.name === selectedBook);
-
-  // Load saved bible background
-  useEffect(() => {
-    if (savedBibleBg && !bibleBg) {
-      setBibleBg(savedBibleBg as BackgroundConfig);
-    }
-  }, [savedBibleBg, bibleBg]);
 
   const { data: verses = [] } = useGetBibleVersesQuery(
     selectedBook && selectedChapter
@@ -195,11 +83,10 @@ export function BibleNavigator() {
     { skip: !selectedBook || !selectedChapter },
   );
 
-  // Auto-scroll to selected verse
+  // Auto-scroll
   useEffect(() => {
     if (selectedVerse !== null) {
-      const el = verseRefs.current.get(selectedVerse);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      verseRefs.current.get(selectedVerse)?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [selectedVerse]);
 
@@ -210,106 +97,72 @@ export function BibleNavigator() {
     if (verseData.length === 0) return;
     setSelectedVerse(verseNum);
     dispatch(presentBible({ verses: verseData, reference: ref }));
-    // Send bible-specific background first (if set)
-    if (bibleBg) broadcastBackground(bibleBg);
-    fetch(`http://localhost:${SIDECAR_PORT}/api/screens/broadcast`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event: "content:bible",
-        roles: [ScreenRole.Public, ScreenRole.Stage, ScreenRole.Stream, ScreenRole.Monitor],
-        data: { verses: verseData, reference: ref },
-      }),
-    });
-  }, [selectedBook, selectedChapter, version, verses, dispatch, bibleBg]);
+    broadcast("content:bible", { verses: verseData, reference: ref });
+  }, [selectedBook, selectedChapter, version, verses, dispatch]);
 
-  // Quick search handler
+  // Quick search
   const handleQuickSearchSubmit = useCallback(() => {
     const parsed = parseReference(quickSearch, books);
     if (parsed) {
       setSelectedBook(parsed.book);
       setSelectedChapter(parsed.chapter);
       setSelectedVerse(null);
-      if (parsed.verse) {
-        // Small delay to let verses load, then send
-        setTimeout(() => sendVerse(parsed.verse!), 300);
-      }
+      if (parsed.verse) setTimeout(() => sendVerse(parsed.verse!), 300);
     }
     setShowQuickSearch(false);
     setQuickSearch("");
   }, [quickSearch, books, sendVerse]);
 
-  // Focus quick search input when shown
   useEffect(() => {
-    if (showQuickSearch) {
-      setTimeout(() => quickSearchRef.current?.focus(), 50);
-    }
+    if (showQuickSearch) setTimeout(() => quickSearchRef.current?.focus(), 50);
   }, [showQuickSearch]);
 
-  // Keyboard navigation
+  // Keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept if quick search is open
       if (showQuickSearch) return;
-
-      // Esc — clear presentation (restore worship wallpaper)
       if (e.key === "Escape") {
         e.preventDefault();
         setSelectedVerse(null);
         dispatch(clearPresentation());
-        broadcastClear();
+        broadcast("content:clear", "blank");
         fetch(`http://localhost:${SIDECAR_PORT}/api/settings/default_wallpaper`)
           .then((r) => r.json())
-          .then((config) => { if (config?.type) broadcastBackground(config); });
+          .then((config) => { if (config?.type) broadcast("background:change", config); });
         return;
       }
-
-      // Arrow keys — navigate verses
       if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         if (selectedBook && selectedChapter && verses.length > 0) {
           e.preventDefault();
-          const current = selectedVerse ?? 0;
-          const next = Math.min(current + 1, verses.length);
-          sendVerse(next);
+          sendVerse(Math.min((selectedVerse ?? 0) + 1, verses.length));
         }
         return;
       }
       if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         if (selectedBook && selectedChapter && verses.length > 0) {
           e.preventDefault();
-          const current = selectedVerse ?? 2;
-          const prev = Math.max(current - 1, 1);
-          sendVerse(prev);
+          sendVerse(Math.max((selectedVerse ?? 2) - 1, 1));
         }
         return;
       }
-
-      // Any letter/number key — open quick search
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         setQuickSearch(e.key);
         setShowQuickSearch(true);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedVerse, selectedBook, selectedChapter, verses, sendVerse, dispatch, showQuickSearch]);
 
   return (
-    <div className="flex gap-2 h-[calc(100vh-8rem)] relative">
+    <div className="flex h-[calc(100vh-8rem)] relative">
       {/* Quick search modal */}
       {showQuickSearch && (
-        <div className="absolute inset-0 z-50 flex items-start justify-center pt-20 bg-black/50">
-          <div
-            className="rounded-xl p-6 w-96 shadow-2xl"
-            style={{
-              background: "var(--color-surface-200)",
-              border: "1px solid var(--color-surface-300)",
-            }}
-          >
+        <div className="absolute inset-0 z-50 flex items-start justify-center pt-20" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+          <div className="card p-6 w-96 shadow-2xl">
             <p className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
-              Digite uma referência para localizar o versículo
+              Digite uma referência para localizar
             </p>
             <input
               ref={quickSearchRef}
@@ -320,58 +173,37 @@ export function BibleNavigator() {
                 if (e.key === "Enter") { e.preventDefault(); handleQuickSearchSubmit(); }
                 if (e.key === "Escape") { e.preventDefault(); setShowQuickSearch(false); setQuickSearch(""); }
               }}
-              placeholder="Ex: Jo 3:16, Genesis 1:1, Sl 23"
-              className="w-full rounded-lg px-4 py-3 text-lg"
-              style={{
-                background: "var(--color-surface-100)",
-                border: "1px solid var(--color-surface-300)",
-                color: "var(--color-text-primary)",
-                outline: "none",
-              }}
-              onFocus={(e) => { e.currentTarget.style.outline = `2px solid var(--color-accent)`; e.currentTarget.style.outlineOffset = "2px"; }}
-              onBlur={(e) => { e.currentTarget.style.outline = "none"; }}
+              placeholder="Ex: Jo 3:16, Gn 1:1, Sl 23"
+              className="input-field w-full text-lg py-3"
               autoFocus
             />
             <div className="mt-3 flex items-center justify-between text-xs" style={{ color: "var(--color-text-muted)" }}>
-              <span>Enter para ir | Esc para fechar</span>
+              <span>Enter para ir · Esc para fechar</span>
               {quickSearch && (() => {
                 const parsed = parseReference(quickSearch, books);
                 return parsed
-                  ? <span className="text-green-400">{parsed.book} {parsed.chapter}{parsed.verse ? `:${parsed.verse}` : ""}</span>
-                  : <span className="text-red-400">Referência não encontrada</span>;
+                  ? <span style={{ color: "var(--color-success)" }}>{parsed.book} {parsed.chapter}{parsed.verse ? `:${parsed.verse}` : ""}</span>
+                  : <span style={{ color: "var(--color-danger)" }}>Não encontrada</span>;
               })()}
             </div>
           </div>
         </div>
       )}
 
-      {/* Left panel — Verse text (main area, like Holyrics) */}
-      <div
-        className="flex-1 flex flex-col rounded-lg overflow-hidden"
-        style={{ background: "var(--color-surface-100)" }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-4 py-2"
-          style={{
-            background: "var(--color-surface-200)",
-            borderBottom: "1px solid var(--color-surface-300)",
-          }}
-        >
-          <h3 className="font-semibold text-sm" style={{ color: "var(--color-text-primary)" }}>
-            {selectedBook && selectedChapter
-              ? `${selectedBook} ${selectedChapter}`
-              : "Selecione um livro"}
-          </h3>
+      {/* LEFT: Verse list (main reading area — like Holyrics) */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header bar */}
+        <div className="toolbar">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold" style={{ color: "var(--color-text-primary)" }}>
+              {selectedBook && selectedChapter ? `${selectedBook} ${selectedChapter}` : "Selecione um livro"}
+            </span>
+          </div>
           <select
             value={version}
             onChange={(e) => { setVersion(e.target.value); setSelectedBook(null); setSelectedChapter(null); setSelectedVerse(null); }}
-            className="rounded px-2 py-1 text-xs"
-            style={{
-              background: "var(--color-surface-300)",
-              border: "1px solid var(--color-surface-400)",
-              color: "var(--color-text-primary)",
-            }}
+            className="input-field text-xs py-1 px-2"
+            style={{ width: "auto" }}
           >
             {versions.map((v) => (
               <option key={v.id} value={v.id}>{v.id.toUpperCase()}</option>
@@ -379,206 +211,133 @@ export function BibleNavigator() {
           </select>
         </div>
 
-        {/* Bible background picker */}
-        <div
-          className="flex items-center gap-2 px-3 py-1.5"
-          style={{ borderBottom: "1px solid var(--color-surface-300)" }}
-        >
-          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Fundo:</span>
-          <button
-            onClick={() => { setBibleBg(null); saveSetting({ key: "bible_background", value: null }); }}
-            className="w-6 h-6 rounded"
-            style={{
-              background: "var(--color-surface-50)",
-              border: !bibleBg
-                ? `2px solid var(--color-accent)`
-                : `1px solid var(--color-surface-400)`,
-              outline: !bibleBg ? `2px solid var(--color-accent)` : "none",
-              outlineOffset: "1px",
-            }}
-            title="Sem fundo (usa papel de parede)"
-          />
-          {backgrounds.map((bg) => {
-            const config: BackgroundConfig = { type: "image", value: `/api/media/file/${bg.id}` };
-            const isActive = bibleBg?.value === config.value;
-            return (
-              <button
-                key={bg.id}
-                onClick={() => { setBibleBg(config); saveSetting({ key: "bible_background", value: config }); }}
-                className="w-6 h-6 rounded overflow-hidden"
-                style={{
-                  outline: isActive ? `2px solid var(--color-accent)` : "none",
-                  outlineOffset: "1px",
-                  border: isActive ? "none" : `1px solid var(--color-surface-400)`,
-                }}
-                title={bg.originalFilename}
-              >
-                <img src={`http://localhost:${SIDECAR_PORT}/api/media/file/${bg.id}`} className="w-full h-full object-cover" alt="" />
-              </button>
-            );
-          })}
-          <input
-            type="color"
-            className="w-6 h-6 rounded cursor-pointer border-0 p-0"
-            onChange={(e) => { const c: BackgroundConfig = { type: "color", value: e.target.value }; setBibleBg(c); saveSetting({ key: "bible_background", value: c }); }}
-            title="Cor sólida"
-          />
-        </div>
-
-        {/* Verse list */}
-        <div ref={verseListRef} className="flex-1 overflow-y-auto p-2">
-          {selectedBook && selectedChapter ? (
-            <div className="space-y-0.5">
-              {verses.map((verse) => (
-                <button
-                  key={verse.verse}
-                  ref={(el) => { if (el) verseRefs.current.set(verse.verse, el); }}
-                  onClick={() => sendVerse(verse.verse)}
-                  onMouseEnter={() => setHoveredVerse(verse.verse)}
-                  onMouseLeave={() => setHoveredVerse(null)}
-                  className="w-full text-left px-3 py-2.5 rounded transition-colors"
-                  style={
-                    selectedVerse === verse.verse
-                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
-                      : hoveredVerse === verse.verse
-                      ? { background: "var(--color-surface-200)", color: "var(--color-text-primary)" }
-                      : { background: "transparent", color: "var(--color-text-secondary)" }
-                  }
-                >
-                  <span
-                    className="text-xs font-bold mr-2"
+        {/* Verses */}
+        <div className="flex-1 overflow-y-auto">
+          {selectedBook && selectedChapter && verses.length > 0 ? (
+            <div className="py-2">
+              {verses.map((verse) => {
+                const isActive = selectedVerse === verse.verse;
+                return (
+                  <button
+                    key={verse.verse}
+                    ref={(el) => { if (el) verseRefs.current.set(verse.verse, el); }}
+                    onClick={() => sendVerse(verse.verse)}
+                    className="w-full text-left px-6 py-3 transition-all"
                     style={{
-                      color: selectedVerse === verse.verse
-                        ? "var(--color-surface-100)"
-                        : "var(--color-accent)",
+                      background: isActive ? "var(--color-accent-glow)" : "transparent",
+                      borderLeft: isActive ? "4px solid var(--color-accent)" : "4px solid transparent",
                     }}
                   >
-                    {verse.verse}
-                  </span>
-                  <span className="text-sm leading-relaxed">{verse.text}</span>
-                </button>
-              ))}
+                    <span className="font-bold mr-2" style={{ color: isActive ? "var(--color-accent)" : "var(--color-accent-dim)", fontSize: "0.8125rem" }}>
+                      {verse.verse}
+                    </span>
+                    <span className="text-[0.9375rem] leading-relaxed" style={{ color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)" }}>
+                      {verse.text}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="h-full flex items-center justify-center">
-              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                Selecione um livro e capítulo
-              </p>
+              <div className="text-center space-y-2">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-surface-500)" strokeWidth="1.5" className="mx-auto">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Selecione um livro à direita</p>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer info */}
-        <div
-          className="px-4 py-2 text-xs flex items-center justify-between"
-          style={{
-            background: "var(--color-surface-200)",
-            borderTop: "1px solid var(--color-surface-300)",
-            color: "var(--color-text-muted)",
-          }}
-        >
-          <span>
+        {/* Footer status bar */}
+        <div className="toolbar" style={{ borderBottom: "none", borderTop: "1px solid var(--color-surface-300)" }}>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
             {selectedVerse
               ? `${selectedBook} ${selectedChapter}:${selectedVerse} — ${version.toUpperCase()}`
-              : "↑↓ Navegar | Esc Limpar | Digite para busca rápida (ex: Jo 3:16)"}
+              : "↑↓ Navegar · Digite para busca rápida · Esc Limpar"}
           </span>
           {selectedVerse && (
-            <span>{selectedVerse} de {verses.length}</span>
+            <span className="text-xs" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
+              {selectedVerse} de {verses.length}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Right panel — Livros + Capítulos + Versículos */}
-      <div className="w-80 flex-shrink-0 flex flex-col gap-2 overflow-hidden">
+      {/* RIGHT: Books grid + Chapters + Verses (Holyrics layout) */}
+      <div className="w-[320px] flex-shrink-0 flex flex-col overflow-hidden" style={{ borderLeft: "1px solid var(--color-surface-300)" }}>
         {/* Books grid */}
-        <div
-          className="flex-1 overflow-y-auto rounded-lg p-2"
-          style={{ background: "var(--color-surface-100)" }}
-        >
-          <div className="grid grid-cols-5 gap-1">
+        <div className="flex-1 overflow-y-auto p-2">
+          <div className="grid grid-cols-6 gap-[3px]">
             {books.map((book) => {
-              const style = getBookStyle(book.name);
+              const color = getBookColor(book.name);
               const isSelected = selectedBook === book.name;
               return (
                 <button
                   key={book.abbr}
                   onClick={() => { setSelectedBook(book.name); setSelectedChapter(1); setSelectedVerse(null); }}
                   title={book.name}
-                  className="rounded p-1 text-center transition-all text-[10px] font-bold leading-tight"
+                  className="rounded-md py-2 px-1 text-center transition-all"
                   style={{
-                    backgroundColor: style.bg,
-                    color: style.color,
-                    outline: isSelected ? `2px solid var(--color-text-primary)` : "none",
-                    outlineOffset: "1px",
-                    transform: isSelected ? "scale(1.05)" : "scale(1)",
-                    zIndex: isSelected ? 10 : "auto",
-                    filter: "brightness(1)",
+                    background: color,
+                    opacity: isSelected ? 1 : 0.85,
+                    outline: isSelected ? "2px solid #fff" : "none",
+                    outlineOffset: "-1px",
                   }}
-                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.filter = "brightness(1.25)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.filter = "brightness(1)"; }}
                 >
-                  <div className="text-xs">{book.abbr}</div>
-                  <div className="text-[8px] font-normal opacity-70 truncate">{book.name}</div>
+                  <div className="text-[11px] font-extrabold text-white leading-none">{book.abbr}</div>
+                  <div className="text-[7px] text-white/60 leading-tight mt-0.5 truncate">{book.name}</div>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Capítulos */}
+        {/* Chapters grid */}
         {selectedBook && currentBook && (
-          <div
-            className="rounded-lg p-2 max-h-36 overflow-y-auto"
-            style={{ background: "var(--color-surface-100)" }}
-          >
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => (
-                <button
-                  key={ch}
-                  onClick={() => { setSelectedChapter(ch); setSelectedVerse(null); }}
-                  onMouseEnter={() => setHoveredChapter(ch)}
-                  onMouseLeave={() => setHoveredChapter(null)}
-                  className="rounded p-1 text-[11px] font-medium transition-colors"
-                  style={
-                    selectedChapter === ch
-                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
-                      : hoveredChapter === ch
-                      ? { background: "var(--color-surface-300)", color: "var(--color-text-primary)" }
-                      : { background: "var(--color-surface-200)", color: "var(--color-text-secondary)" }
-                  }
-                >
-                  {ch}
-                </button>
-              ))}
+          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "140px" }}>
+            <div className="grid grid-cols-7 gap-[2px]">
+              {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => {
+                const isActive = selectedChapter === ch;
+                return (
+                  <button
+                    key={ch}
+                    onClick={() => { setSelectedChapter(ch); setSelectedVerse(null); }}
+                    className="rounded py-1.5 text-xs font-medium transition-all text-center"
+                    style={{
+                      background: isActive ? "var(--color-accent)" : "var(--color-surface-300)",
+                      color: isActive ? "var(--color-surface-50)" : "var(--color-text-secondary)",
+                    }}
+                  >
+                    {ch}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Versículos */}
+        {/* Verse numbers grid */}
         {selectedChapter && verses.length > 0 && (
-          <div
-            className="rounded-lg p-2 max-h-36 overflow-y-auto"
-            style={{ background: "var(--color-surface-100)" }}
-          >
-            <div className="grid grid-cols-7 gap-1">
-              {verses.map((v) => (
-                <button
-                  key={v.verse}
-                  onClick={() => sendVerse(v.verse)}
-                  onMouseEnter={() => setHoveredVerseNum(v.verse)}
-                  onMouseLeave={() => setHoveredVerseNum(null)}
-                  className="rounded p-1 text-[11px] font-medium transition-colors"
-                  style={
-                    selectedVerse === v.verse
-                      ? { background: "var(--color-accent)", color: "var(--color-surface-50)" }
-                      : hoveredVerseNum === v.verse
-                      ? { background: "var(--color-surface-300)", color: "var(--color-text-primary)" }
-                      : { background: "var(--color-surface-200)", color: "var(--color-text-secondary)" }
-                  }
-                >
-                  {v.verse}
-                </button>
-              ))}
+          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "140px" }}>
+            <div className="grid grid-cols-7 gap-[2px]">
+              {verses.map((v) => {
+                const isActive = selectedVerse === v.verse;
+                return (
+                  <button
+                    key={v.verse}
+                    onClick={() => sendVerse(v.verse)}
+                    className="rounded py-1.5 text-xs font-medium transition-all text-center"
+                    style={{
+                      background: isActive ? "var(--color-accent)" : "var(--color-surface-300)",
+                      color: isActive ? "var(--color-surface-50)" : "var(--color-text-secondary)",
+                    }}
+                  >
+                    {v.verse}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
