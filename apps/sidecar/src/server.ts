@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { serveStatic } from "hono/bun";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import type { Database } from "bun:sqlite";
@@ -28,6 +31,7 @@ export interface AppContext {
   db: Database;
   biblesDir: string;
   mediaDir: string;
+  publicDir: string;
 }
 
 export function createApp(ctx: AppContext) {
@@ -64,6 +68,21 @@ export function createApp(ctx: AppContext) {
   app.route("/api/settings", settingsRoutes(settingsService));
 
   app.get("/api/health", (c) => c.json({ status: "ok", ip: getLocalIP() }));
+
+  // Serve static assets
+  app.use("/css/*", serveStatic({ root: ctx.publicDir }));
+  app.use("/js/*", serveStatic({ root: ctx.publicDir }));
+
+  // Serve screen HTML pages
+  const screenPages = ["index", "public", "stage", "stream", "monitor", "bible", "tech"];
+  for (const page of screenPages) {
+    const route = page === "index" ? "/" : `/${page}`;
+    app.get(route, (c) => {
+      const filePath = join(ctx.publicDir, `${page}.html`);
+      if (!existsSync(filePath)) return c.text("Page not found", 404);
+      return c.html(readFileSync(filePath, "utf-8"));
+    });
+  }
 
   return { app, httpServer, io };
 }

@@ -17,8 +17,9 @@ runMigrations(db);
 
 const biblesDir = join(import.meta.dir, "../../../assets/bibles");
 const mediaDir = join(dataDir, "media");
+const publicDir = join(import.meta.dir, "../public");
 
-const { app, httpServer } = createApp({ db, biblesDir, mediaDir });
+const { app, httpServer } = createApp({ db, biblesDir, mediaDir, publicDir });
 
 // Mount Hono on the Node http server (same port for HTTP + WS)
 httpServer.on("request", async (req, res) => {
