@@ -134,14 +134,58 @@ export function BibleNavigator() {
       if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         if (selectedBook && selectedChapter && verses.length > 0) {
           e.preventDefault();
-          sendVerse(Math.min((selectedVerse ?? 0) + 1, verses.length));
+          const next = (selectedVerse ?? 0) + 1;
+          if (next <= verses.length) {
+            sendVerse(next);
+          } else {
+            // End of chapter — go to next chapter or next book
+            const bookObj = books.find((b) => b.name === selectedBook);
+            if (bookObj && selectedChapter < bookObj.chapters) {
+              setSelectedChapter(selectedChapter + 1);
+              setSelectedVerse(null);
+              setTimeout(() => sendVerse(1), 300);
+            } else {
+              // End of book — go to next book chapter 1
+              const bookIndex = books.findIndex((b) => b.name === selectedBook);
+              if (bookIndex >= 0 && bookIndex < books.length - 1) {
+                const nextBook = books[bookIndex + 1];
+                setSelectedBook(nextBook.name);
+                setSelectedChapter(1);
+                setSelectedVerse(null);
+                setTimeout(() => sendVerse(1), 300);
+              }
+            }
+          }
         }
         return;
       }
       if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         if (selectedBook && selectedChapter && verses.length > 0) {
           e.preventDefault();
-          sendVerse(Math.max((selectedVerse ?? 2) - 1, 1));
+          const prev = (selectedVerse ?? 2) - 1;
+          if (prev >= 1) {
+            sendVerse(prev);
+          } else {
+            // Start of chapter — go to previous chapter or previous book
+            if (selectedChapter > 1) {
+              setSelectedChapter(selectedChapter - 1);
+              setSelectedVerse(null);
+              // Go to last verse of previous chapter (delay for data load)
+              setTimeout(() => {
+                // We don't know the verse count yet, so go to a high number
+                // sendVerse will clamp it
+              }, 300);
+            } else {
+              // Start of book — go to previous book last chapter
+              const bookIndex = books.findIndex((b) => b.name === selectedBook);
+              if (bookIndex > 0) {
+                const prevBook = books[bookIndex - 1];
+                setSelectedBook(prevBook.name);
+                setSelectedChapter(prevBook.chapters);
+                setSelectedVerse(null);
+              }
+            }
+          }
         }
         return;
       }
