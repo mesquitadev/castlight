@@ -190,8 +190,8 @@ export function BibleNavigator() {
         </div>
       )}
 
-      {/* LEFT: Verse list (main reading area — like Holyrics) */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* LEFT: Verse list (compact reading area) */}
+      <div className="w-[340px] flex-shrink-0 flex flex-col overflow-hidden">
         {/* Header bar */}
         <div className="toolbar">
           <div className="flex items-center gap-3">
@@ -222,16 +222,16 @@ export function BibleNavigator() {
                     key={verse.verse}
                     ref={(el) => { if (el) verseRefs.current.set(verse.verse, el); }}
                     onClick={() => sendVerse(verse.verse)}
-                    className="w-full text-left px-6 py-3 transition-all"
+                    className="w-full text-left px-4 py-2 transition-all"
                     style={{
                       background: isActive ? "var(--color-accent-glow)" : "transparent",
                       borderLeft: isActive ? "4px solid var(--color-accent)" : "4px solid transparent",
                     }}
                   >
-                    <span className="font-bold mr-2" style={{ color: isActive ? "var(--color-accent)" : "var(--color-accent-dim)", fontSize: "0.8125rem" }}>
+                    <span className="font-bold mr-1.5" style={{ color: isActive ? "var(--color-accent)" : "var(--color-accent-dim)", fontSize: "0.75rem" }}>
                       {verse.verse}
                     </span>
-                    <span className="text-[0.9375rem] leading-relaxed" style={{ color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)" }}>
+                    <span className="text-[0.8125rem] leading-snug" style={{ color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)" }}>
                       {verse.text}
                     </span>
                   </button>
@@ -265,11 +265,11 @@ export function BibleNavigator() {
         </div>
       </div>
 
-      {/* RIGHT: Books grid + Chapters + Verses (Holyrics layout) */}
-      <div className="w-[320px] flex-shrink-0 flex flex-col overflow-hidden" style={{ borderLeft: "1px solid var(--color-surface-300)" }}>
+      {/* RIGHT: Books grid + Chapters + Verses (main area — Holyrics layout) */}
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ borderLeft: "1px solid var(--color-surface-300)" }}>
         {/* Books grid */}
         <div className="flex-1 overflow-y-auto p-2">
-          <div className="grid grid-cols-6 gap-[3px]">
+          <div className="grid grid-cols-7 gap-1">
             {books.map((book) => {
               const color = getBookColor(book.name);
               const isSelected = selectedBook === book.name;
@@ -278,16 +278,17 @@ export function BibleNavigator() {
                   key={book.abbr}
                   onClick={() => { setSelectedBook(book.name); setSelectedChapter(1); setSelectedVerse(null); }}
                   title={book.name}
-                  className="rounded-md py-2 px-1 text-center transition-all"
+                  className="rounded-lg py-2.5 px-1 text-center transition-all"
                   style={{
                     background: color,
-                    opacity: isSelected ? 1 : 0.85,
+                    opacity: isSelected ? 1 : 0.8,
                     outline: isSelected ? "2px solid #fff" : "none",
-                    outlineOffset: "-1px",
+                    outlineOffset: "1px",
+                    boxShadow: isSelected ? "0 0 8px rgba(255,255,255,0.2)" : "none",
                   }}
                 >
-                  <div className="text-[11px] font-extrabold text-white leading-none">{book.abbr}</div>
-                  <div className="text-[7px] text-white/60 leading-tight mt-0.5 truncate">{book.name}</div>
+                  <div className="text-sm font-extrabold text-white leading-none">{book.abbr}</div>
+                  <div className="text-[8px] text-white/50 leading-tight mt-1 truncate">{book.name}</div>
                 </button>
               );
             })}
@@ -296,15 +297,15 @@ export function BibleNavigator() {
 
         {/* Chapters grid */}
         {selectedBook && currentBook && (
-          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "140px" }}>
-            <div className="grid grid-cols-7 gap-[2px]">
+          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "160px" }}>
+            <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map((ch) => {
                 const isActive = selectedChapter === ch;
                 return (
                   <button
                     key={ch}
                     onClick={() => { setSelectedChapter(ch); setSelectedVerse(null); }}
-                    className="rounded py-1.5 text-xs font-medium transition-all text-center"
+                    className="rounded-md py-2 text-sm font-semibold transition-all text-center"
                     style={{
                       background: isActive ? "var(--color-accent)" : "var(--color-surface-300)",
                       color: isActive ? "var(--color-surface-50)" : "var(--color-text-secondary)",
@@ -320,15 +321,15 @@ export function BibleNavigator() {
 
         {/* Verse numbers grid */}
         {selectedChapter && verses.length > 0 && (
-          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "140px" }}>
-            <div className="grid grid-cols-7 gap-[2px]">
+          <div className="p-2 overflow-y-auto" style={{ borderTop: "1px solid var(--color-surface-300)", maxHeight: "160px" }}>
+            <div className="grid grid-cols-7 gap-1">
               {verses.map((v) => {
                 const isActive = selectedVerse === v.verse;
                 return (
                   <button
                     key={v.verse}
                     onClick={() => sendVerse(v.verse)}
-                    className="rounded py-1.5 text-xs font-medium transition-all text-center"
+                    className="rounded-md py-2 text-sm font-semibold transition-all text-center"
                     style={{
                       background: isActive ? "var(--color-accent)" : "var(--color-surface-300)",
                       color: isActive ? "var(--color-surface-50)" : "var(--color-text-secondary)",
